@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>12 · Capability seams &amp; where things live — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -124,7 +127,7 @@ fiber. Each is a self-contained seam you now have the vocabulary to read.</p>
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> The capability-seam triple is…</p>
+  <p class="q"><span class="tag">Retrieval</span> The capability-seam triple is…</p>
   <div class="opts">
     <button>define → mock → test</button>
     <button data-ok>Definition (ctx.* contract) → Provider (registers impl) → Consumer (uses it)</button>
@@ -135,7 +138,7 @@ fiber. Each is a self-contained seam you now have the vocabulary to read.</p>
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> To find what a package provides to the rest of the system, the fastest grep is…</p>
+  <p class="q"><span class="tag">Retrieval</span> To find what a package provides to the rest of the system, the fastest grep is…</p>
   <div class="opts">
     <button>grep 'export'</button>
     <button data-ok>grep 'super(ctx, ' — it reveals the ctx.* service names a package publishes</button>
@@ -145,7 +148,7 @@ fiber. Each is a self-contained seam you now have the vocabulary to read.</p>
   it tells you exactly which <code>ctx.*</code> seam(s) a package fills.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Open <a class="code" data-src="packages/README.md">packages/README.md</a> — the canonical package
 group map — and pick one group to read end-to-end. Then check the
 <a class="code" data-src="reference/source-map.html">interactive source map</a> here whenever a

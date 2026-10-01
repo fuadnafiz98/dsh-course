@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>02 · Context: the shared world — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -192,7 +195,7 @@ events that plugins can hook — the service directory itself is extensible.</p>
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> Plugin B needs the session store. What does it import?</p>
+  <p class="q"><span class="tag">Retrieval</span> Plugin B needs the session store. What does it import?</p>
   <div class="opts">
     <button data-ok>Nothing — it declares `inject: ['sessions']` and reads `ctx.sessions`</button>
     <button>`import { SessionStore } from 'dsh-session'`</button>
@@ -204,7 +207,7 @@ events that plugins can hook — the service directory itself is extensible.</p>
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> What does <code>ctx.isolate('tools')</code> give you?</p>
+  <p class="q"><span class="tag">Retrieval</span> What does <code>ctx.isolate('tools')</code> give you?</p>
   <div class="opts">
     <button>A sandbox where ctx.tools throws</button>
     <button data-ok>A child context where the 'tools' service resolves in a private realm</button>
@@ -215,7 +218,7 @@ events that plugins can hook — the service directory itself is extensible.</p>
   <code>ctx.tools</code> is untouched. Presets rely on this — lesson 11.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Read <a class="code" data-src="vendor/cordis/src/context.ts">vendor/cordis/src/context.ts</a>
 top to bottom — it's only ~150 lines and it's the foundation under everything else.
 Questions? Ask me.</p>

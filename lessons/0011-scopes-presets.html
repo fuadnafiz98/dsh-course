@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>11 · Scopes, realms &amp; presets — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -115,7 +118,7 @@ composition made the history.</p>
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> Two agents need different tool sets in one process. The mechanism?</p>
+  <p class="q"><span class="tag">Retrieval</span> Two agents need different tool sets in one process. The mechanism?</p>
   <div class="opts">
     <button>Two separate processes</button>
     <button data-ok>Each agent gets a scope; a scoped registry layer shadows the global tools for that agent</button>
@@ -126,7 +129,7 @@ composition made the history.</p>
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> A preset is best described as…</p>
+  <p class="q"><span class="tag">Retrieval</span> A preset is best described as…</p>
   <div class="opts">
     <button>A subclass of the agent loop</button>
     <button data-ok>A named bundle of plugins + config mounted inside an agent's scope</button>
@@ -136,7 +139,7 @@ composition made the history.</p>
   in a scope so it only affects one agent. Specialization without forking the loop.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Read <a class="code" data-src="packages/core/scope/src/index.ts">scope/src/index.ts</a> (the
 <code>createScope</code>/<code>scopeTarget</code>/<code>ScopedLayers</code> trio) and
 <a class="code" data-src="packages/preset/agent-preset-registry/src/index.ts">agent-preset-registry</a>

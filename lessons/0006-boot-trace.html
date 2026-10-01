@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>06 · Boot trace: dsh web — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -166,7 +169,7 @@ load</code>) so the report says <i>where</i> boot died, not just that it did.</p
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> In <code>dsh web</code>, which code actually reads the YAML and mounts the plugin rows?</p>
+  <p class="q"><span class="tag">Retrieval</span> In <code>dsh web</code>, which code actually reads the YAML and mounts the plugin rows?</p>
   <div class="opts">
     <button>bin.ts — it imports each plugin directly</button>
     <button data-ok>The cordis:include builtin, mounted inside boot() via mountRootInclude()</button>
@@ -178,7 +181,7 @@ load</code>) so the report says <i>where</i> boot died, not just that it did.</p
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> Why does runProfile() provide <code>profileContext</code> inside a prepare callback rather than before boot()?</p>
+  <p class="q"><span class="tag">Retrieval</span> Why does runProfile() provide <code>profileContext</code> inside a prepare callback rather than before boot()?</p>
   <div class="opts">
     <button>It has to run after the Loader exists, but before any config rows mount</button>
     <button data-ok>Both reasons — it needs the context boot() creates, and it must precede the rows whose !!js expressions read it</button>
@@ -189,7 +192,7 @@ load</code>) so the report says <i>where</i> boot died, not just that it did.</p
   as they mount. The prepare callback is the only slot that is both post-Context and pre-tree.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Re-trace this path yourself in the editor: <code>bin.ts → profile-boot.ts → app-boot/index.ts
 (boot → mountRootInclude → auditStartupEntries)</code>. Then run
 <code>dsh --profile web --dump-config</code> and match a few rows to the plugins you now know.</p>

@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>07 · The session log — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -45,7 +48,7 @@ key idea:</p>
   <defs><marker id="ah7" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
 
   <rect class="dg-layer" x="10" y="10" width="360" height="360" rx="12"/>
-  <text class="dg-layer-label" x="24" y="30">THE LOG — append-only source of truth</text>
+  <text class="dg-layer-label" x="24" y="30">The log — append-only source of truth</text>
   <g class="dg-node n-event" transform="translate(40,50)"  data-dg-title="Lifecycle" data-dg-body="#t7-lifecycle"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">turn/start · turn/end · step/start · step/end</text></g>
   <g class="dg-node n-event" transform="translate(40,88)"  data-dg-title="Request bookkeeping" data-dg-body="#t7-book"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">request/header · request/context</text></g>
   <g class="dg-node n-event" transform="translate(40,126)" data-dg-title="Tool calls" data-dg-body="#t7-toolcall"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">tool/call — the model asked</text></g>
@@ -60,7 +63,7 @@ key idea:</p>
   <text class="dg-label" x="390" y="228" text-anchor="middle" transform="rotate(0)">project</text>
 
   <rect class="dg-layer" x="410" y="10" width="340" height="360" rx="12"/>
-  <text class="dg-layer-label" x="424" y="30">THE SURFACE — model-visible view</text>
+  <text class="dg-layer-label" x="424" y="30">The surface — model-visible view</text>
   <g class="dg-node n-core" transform="translate(440,50)" data-dg-title="surface node 0" data-dg-body="#t7-node0"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">node 0 · system/message</text></g>
   <g class="dg-node n-core" transform="translate(440,92)" data-dg-title="user turns" data-dg-body="#t7-user"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">user/message × N</text></g>
   <g class="dg-node n-core" transform="translate(440,134)" data-dg-title="assistant turns" data-dg-body="#t7-asst"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">assistant/message × N</text></g>
@@ -129,7 +132,7 @@ the log is the database.</p>
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> The model's context for the next request is derived from…</p>
+  <p class="q"><span class="tag">Retrieval</span> The model's context for the next request is derived from…</p>
   <div class="opts">
     <button>a Conversation object mutated as turns run</button>
     <button data-ok>the session log's surface — an ordered set of message-producing events</button>
@@ -140,7 +143,7 @@ the log is the database.</p>
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> A model call fails mid-stream and the step retries. Where does the failed attempt go?</p>
+  <p class="q"><span class="tag">Retrieval</span> A model call fails mid-stream and the step retries. Where does the failed attempt go?</p>
   <div class="opts">
     <button>It's discarded — only success is logged</button>
     <button data-ok>Logged as assistant/attempt — failed tries are durable so replay doesn't fabricate history</button>
@@ -151,7 +154,7 @@ the log is the database.</p>
   doesn't contribute a surface message.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Read <a class="code" data-src="packages/core/session/src/types.ts" data-lines="275-428">SessionEventMap</a>
 end-to-end — every JSDoc comment is a contract, and this file is the single best source of "what
 can be in a session". Then skim <code>surface.ts</code> for the projection layer.</p>

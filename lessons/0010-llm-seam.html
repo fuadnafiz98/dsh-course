@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>10 · The LLM seam — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -114,7 +117,7 @@ so no observer ever sees a half-swapped registry. This is a model for writing yo
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> How does the loop reach DeepSeek's API?</p>
+  <p class="q"><span class="tag">Retrieval</span> How does the loop reach DeepSeek's API?</p>
   <div class="opts">
     <button>It imports @deepseek-ai/dsh-deepseek directly</button>
     <button data-ok>It calls ctx.llm.prepareCall / stream — whichever adapter registered the route serves it</button>
@@ -126,7 +129,7 @@ so no observer ever sees a half-swapped registry. This is a model for writing yo
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> What happens to a provider's routes when its adapter plugin unloads?</p>
+  <p class="q"><span class="tag">Retrieval</span> What happens to a provider's routes when its adapter plugin unloads?</p>
   <div class="opts">
     <button>They stay registered until restart</button>
     <button data-ok>They're removed — registration is an effect owned by the fiber</button>
@@ -136,7 +139,7 @@ so no observer ever sees a half-swapped registry. This is a model for writing yo
   <code>llm/adapters-updated</code>. Unloading the fiber un-registers the provider automatically.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Read <a class="code" data-src="packages/llm/llm/src/index.ts" data-lines="342-470">LlmRuntime</a>
 (<code>registerAdapter</code> → <code>prepareRoutes</code> → <code>commitRoutes</code> →
 <code>prepareCall</code>), then the canonical types in

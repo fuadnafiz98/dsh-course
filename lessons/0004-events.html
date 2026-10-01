@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>04 · Events: five dispatch modes — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -145,7 +148,7 @@ UI watches one session without filtering global noise, and it's what the preset/
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> A tool call needs an approval prompt that can block it. Which event mode?</p>
+  <p class="q"><span class="tag">Retrieval</span> A tool call needs an approval prompt that can block it. Which event mode?</p>
   <div class="opts">
     <button>emit — fire the prompt and don't wait</button>
     <button data-ok>waterfall — a listener returns early to deny, or calls next() to allow</button>
@@ -156,7 +159,7 @@ UI watches one session without filtering global noise, and it's what the preset/
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> Why does the loop's <code>agent/status</code> use <code>emit</code> instead of <code>parallel</code>?</p>
+  <p class="q"><span class="tag">Retrieval</span> Why does the loop's <code>agent/status</code> use <code>emit</code> instead of <code>parallel</code>?</p>
   <div class="opts">
     <button>emit is faster</button>
     <button data-ok>The loop must not await UI listeners — status is observability, not a dependency</button>
@@ -166,7 +169,7 @@ UI watches one session without filtering global noise, and it's what the preset/
   "here's a fact; do with it what you will" — the loop continues immediately.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Read <a class="code" data-src="vendor/cordis/src/events.ts" data-lines="131-340">events.ts</a>
 top-down — the mode dispatch is a small readable kernel. Then find one waterfall usage:
 <code>ctx.on('agent/pre-step', ...)</code> in the compaction package is a good one.</p>

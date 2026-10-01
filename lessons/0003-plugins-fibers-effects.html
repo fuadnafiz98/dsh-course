@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>03 · Plugins, fibers &amp; effects — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -197,7 +200,7 @@ true: dependents just never see the service.</p>
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> <code>tool-bash</code> is listed before <code>tools</code> in the patch. Is that a bug?</p>
+  <p class="q"><span class="tag">Retrieval</span> <code>tool-bash</code> is listed before <code>tools</code> in the patch. Is that a bug?</p>
   <div class="opts">
     <button>Yes — later rows shadow earlier ones</button>
     <button data-ok>No — inject declarations, not row order, sequence activation</button>
@@ -209,7 +212,7 @@ true: dependents just never see the service.</p>
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> Your plugin calls <code>ctx.on('ready', ...)</code>. What keeps that listener from leaking after your plugin unloads?</p>
+  <p class="q"><span class="tag">Retrieval</span> Your plugin calls <code>ctx.on('ready', ...)</code>. What keeps that listener from leaking after your plugin unloads?</p>
   <div class="opts">
     <button>You return a disposer from apply()</button>
     <button>Cordis garbage-collects listeners</button>
@@ -220,7 +223,7 @@ true: dependents just never see the service.</p>
   automatically undoing listeners, provides, child plugins, everything.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Read <a class="code" data-src="vendor/cordis/src/fiber.ts">vendor/cordis/src/fiber.ts</a> end to
 end — it's the densest ~300 lines in the repo, and after this lesson it's genuinely readable.
 Then look at <a class="code" data-src="packages/core/agent-loop/src/index.ts">agent-loop's index.ts</a>

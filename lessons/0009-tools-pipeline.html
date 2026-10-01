@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>09 · The tool pipeline — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -143,7 +146,7 @@ design.</p>
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> The model asks for 5 parallel tool calls and a user hits cancel mid-flight. What reaches the log?</p>
+  <p class="q"><span class="tag">Retrieval</span> The model asks for 5 parallel tool calls and a user hits cancel mid-flight. What reaches the log?</p>
   <div class="opts">
     <button>Nothing — the aborted calls vanish</button>
     <button data-ok>Started calls commit real results; unstarted calls get a synthetic 'aborted before dispatch' result</button>
@@ -155,7 +158,7 @@ design.</p>
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> Where would an "approve before running bash" feature hook in?</p>
+  <p class="q"><span class="tag">Retrieval</span> Where would an "approve before running bash" feature hook in?</p>
   <div class="opts">
     <button>tools/post-execute</button>
     <button data-ok>tools/pre-execute — it can veto the call before the body runs</button>
@@ -165,7 +168,7 @@ design.</p>
   admit/veto waterfall. Post-execute only shapes results after the fact.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Read <a class="code" data-src="packages/core/agent-loop/src/tool-calls.ts">tool-calls.ts</a>
 top-to-bottom — the <code>runGroup</code> scheduler is the single most instructive concurrency
 pattern in the codebase. Then look at how one tool (e.g. <code>dsh-tool-bash</code>) registers

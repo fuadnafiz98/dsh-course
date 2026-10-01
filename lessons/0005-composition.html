@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>05 · cordis.yml, patches &amp; profiles — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -173,7 +176,7 @@ rows vanish in dumps: no profile context is provided in dump mode. It's the fast
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> You want to disable <code>tool-bash</code> for your own profile without touching dsh-base. Where does that edit go?</p>
+  <p class="q"><span class="tag">Retrieval</span> You want to disable <code>tool-bash</code> for your own profile without touching dsh-base. Where does that edit go?</p>
   <div class="opts">
     <button>Edit dsh-base's patch in place</button>
     <button data-ok>A row in your profile's cordis.patch.yml targeting id 'tool-bash' with disabled: true</button>
@@ -185,7 +188,7 @@ rows vanish in dumps: no profile context is provided in dump mode. It's the fast
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> Why is the profile root <code>cordis.yml</code> always <code>[]</code>?</p>
+  <p class="q"><span class="tag">Retrieval</span> Why is the profile root <code>cordis.yml</code> always <code>[]</code>?</p>
   <div class="opts">
     <button>It's a bug that gets fixed at boot</button>
     <button data-ok>Patches do all composition; the empty file is just the Loader's filesystem anchor</button>
@@ -195,7 +198,7 @@ rows vanish in dumps: no profile context is provided in dump mode. It's the fast
   projection — written each boot — so plugin-driven write-backs never duplicate bundle inserts.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Skim <a class="code" data-src="packages/bundle/base/cordis.patch.yml">dsh-base's full patch</a>
 start to finish — every row is one plugin you'll meet in later lessons. Then read
 <a class="code" data-src="apps/cli/src/profile-boot.ts" data-lines="244-319">runProfile()</a> to

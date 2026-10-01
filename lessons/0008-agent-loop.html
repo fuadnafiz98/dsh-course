@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>08 · The agent loop — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -186,7 +189,7 @@ without filtering a global feed.</p>
 </div></details>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> Where in the loop does the session log actually become the model's context?</p>
+  <p class="q"><span class="tag">Retrieval</span> Where in the loop does the session log actually become the model's context?</p>
   <div class="opts">
     <button>In preStep(), when the inbox is claimed</button>
     <button data-ok>In buildRequest(), at session.deriveMessages()</button>
@@ -197,7 +200,7 @@ without filtering a global feed.</p>
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> A plugin wants to reject a step before the model sees it. Where does it hook?</p>
+  <p class="q"><span class="tag">Retrieval</span> A plugin wants to reject a step before the model sees it. Where does it hook?</p>
   <div class="opts">
     <button>agent/request</button>
     <button data-ok>agent/pre-step — return { kind: 'reject' }</button>
@@ -207,7 +210,7 @@ without filtering a global feed.</p>
   turn as <code>blocked</code> before a request is ever built.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Read <a class="code" data-src="packages/core/agent-loop/src/agent.ts">agent.ts</a> in order —
 <code>send → wakeDriver → kick → turn → preStep → step → prepareRequest → buildRequest</code>. It's
 the most important file in the repo; this lesson is your map for it. Then open

@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>01 · The shape of dsh — DeepSeek Harness course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/course.css">
 </head>
 <body>
@@ -154,7 +157,7 @@ need the paper to use the codebase, but it's the reason effects and scopes exist
 invariant is your compass for the rest of the course.</p>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> A new coworker asks where "the main function" of dsh lives. What's the honest answer?</p>
+  <p class="q"><span class="tag">Retrieval</span> A new coworker asks where "the main function" of dsh lives. What's the honest answer?</p>
   <div class="opts">
     <button>apps/cli/src/bin.ts — it owns the whole pipeline</button>
     <button data-ok>There's no main pipeline — bin.ts boots a Loader that mounts whatever the profile's patch layers list</button>
@@ -167,7 +170,7 @@ invariant is your compass for the rest of the course.</p>
 </div>
 
 <div class="quiz">
-  <p class="q"><span class="tag">RETRIEVAL</span> Which layer decides <i>which plugins exist</i> in a running app?</p>
+  <p class="q"><span class="tag">Retrieval</span> Which layer decides <i>which plugins exist</i> in a running app?</p>
   <div class="opts">
     <button>The core spine (packages/core)</button>
     <button>The capability seams (ctx.* services)</button>
@@ -178,7 +181,7 @@ invariant is your compass for the rest of the course.</p>
   <code>cordis.patch.yml</code> and <code>--patch</code> overlays get the last word.</p>
 </div>
 
-<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+<p class="callout"><span class="tag">Primary source</span>
 Skim <a class="code" data-src="docs/architecture.md">docs/architecture.md</a> next — it is the
 project's own ordered map, and this course follows its outline. And as always: <b>ask me
 anything that's unclear</b> — that's what I'm here for.</p>
