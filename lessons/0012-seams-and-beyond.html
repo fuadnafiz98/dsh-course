@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12 · Capability seams &amp; where things live — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 12 · the wide map</span>
+  <span class="spacer"></span>
+  <a href="../reference/source-map.html">source map</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0012 · the wide map · ~20 min</p>
+<h1>Capability seams &amp; where things live</h1>
+
+<p class="lede">You've learned every mechanism. This last lesson zooms all the way out: the one
+pattern that repeats across the whole repo — the <b>capability seam</b> — and a guided map of which
+package owns which behavior, so you can navigate anything new by reflex.</p>
+
+<h2>The pattern, named</h2>
+<p>From the glossary: a <b>capability seam</b> is a triple —</p>
+<ol>
+  <li><b>Definition</b> — a Service contract (an abstract class + its <code>ctx.*</code> name),</li>
+  <li><b>Provider</b> — a plugin that registers an implementation, and</li>
+  <li><b>Consumer</b> — the code (often a model-facing tool) that uses it.</li>
+</ol>
+<p>AGENTS.md is blunt: a seam is complete only when all three roles exist, and they're split only
+when they evolve independently. This is why <code>packages/&lt;group&gt;/</code> so often contains
+three sibling packages: <code>dsh-&lt;thing&gt;</code> (definition), <code>dsh-&lt;thing&gt;-local</code>
+(provider), <code>dsh-tool-&lt;thing&gt;</code> (consumer tool).</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 760 300">
+  <defs><marker id="ah12" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+  <g class="dg-node n-cordis" transform="translate(40,120)" data-dg-title="Consumer" data-dg-body="#t12-cons"><rect width="160" height="56" rx="9"/><text x="80" y="24" text-anchor="middle">CONSUMER</text><text x="80" y="41" text-anchor="middle" class="sub">dsh-tool-bash (the tool)</text></g>
+  <path class="dg-edge" d="M200 148 L250 148" marker-end="url(#ah12)"/>
+  <text class="dg-label" x="225" y="138" text-anchor="middle">ctx.shell</text>
+  <g class="dg-node n-core" transform="translate(254,120)" data-dg-title="Definition" data-dg-body="#t12-def"><rect width="170" height="56" rx="9"/><text x="85" y="24" text-anchor="middle">DEFINITION</text><text x="85" y="41" text-anchor="middle" class="sub">dsh-shell (ctx.shell contract)</text></g>
+  <path class="dg-edge" d="M424 148 L474 148" marker-end="url(#ah12)"/>
+  <text class="dg-label" x="449" y="138" text-anchor="middle">provided by</text>
+  <g class="dg-node n-tool" transform="translate(478,60)" data-dg-title="local provider" data-dg-body="#t12-local"><rect width="240" height="44" rx="9"/><text x="120" y="27" text-anchor="middle">dsh-bash-local</text></g>
+  <g class="dg-node n-tool" transform="translate(478,116)" data-dg-title="sandbox provider" data-dg-body="#t12-sand"><rect width="240" height="44" rx="9"/><text x="120" y="27" text-anchor="middle">dsh-bash-sandbox</text></g>
+  <g class="dg-node n-tool" transform="translate(478,172)" data-dg-title="ssh provider" data-dg-body="#t12-ssh"><rect width="240" height="44" rx="9"/><text x="120" y="27" text-anchor="middle">dsh-bash-ssh / remote</text></g>
+  <text class="dg-label" x="598" y="245" text-anchor="middle">swap the provider → the tool</text>
+  <text class="dg-label" x="598" y="262" text-anchor="middle">runs elsewhere unchanged</text>
+</svg>
+<figcaption>The seam decouples <i>what the model asks for</i> from <i>where it executes</i>. One
+consumer tool, one contract, many providers.</figcaption>
+</figure>
+
+<h2>The seam atlas</h2>
+<p>Apply the triple to every group — the rows are the lesson in itself:</p>
+<table class="cat">
+  <tr><th>Seam (<code>ctx.*</code>)</th><th>Definition</th><th>Providers</th><th>Consumer(s)</th></tr>
+  <tr><td><code>shell</code></td><td><a class="code" data-src="packages/shell">dsh-shell</a></td><td>bash-local · bash-sandbox · pwsh · ssh</td><td><code>dsh-tool-bash</code></td></tr>
+  <tr><td><code>fs</code></td><td><a class="code" data-src="packages/fs">dsh-fs</a></td><td>fs-local · fs-sandbox · fs-ssh</td><td>fs tools, LSP, file tools</td></tr>
+  <tr><td><code>subagents</code></td><td><a class="code" data-src="packages/subagent">dsh-subagents</a></td><td>spawn · fork · acp · codex · claude-code</td><td><code>dsh-tool-subagent</code></td></tr>
+  <tr><td><code>sandbox</code></td><td><a class="code" data-src="packages/sandbox">dsh-sandbox</a></td><td>seatbelt (mac) · landlock/bwrap (linux) · acl (win)</td><td>shell/terminal executors</td></tr>
+  <tr><td><code>jobs</code></td><td><a class="code" data-src="packages/jobs">dsh-jobs</a></td><td>local jobs registry</td><td><code>job_*</code> tools, bash background</td></tr>
+  <tr><td><code>web</code></td><td><a class="code" data-src="packages/web">dsh-web</a></td><td>search (deepseek/exa/perplexity) · fetch</td><td><code>dsh-tool-web</code></td></tr>
+  <tr><td><code>terminal</code></td><td><a class="code" data-src="packages/terminal">dsh-terminal</a></td><td>persistent PTY providers</td><td><code>dsh-tool-terminal</code></td></tr>
+  <tr><td><code>lsp</code></td><td><a class="code" data-src="packages/lsp">dsh-lsp</a></td><td>per-language server providers</td><td><code>dsh-tool-lsp</code></td></tr>
+  <tr><td><code>sessionPersistence</code></td><td><a class="code" data-src="packages/session">dsh-session-persistence</a></td><td>JSONL backend</td><td>the session store</td></tr>
+  <tr><td><code>mcp</code></td><td><a class="code" data-src="packages/mcp">dsh-mcp</a></td><td>MCP server connections</td><td>tool bridge → ctx.tools</td></tr>
+  <tr><td><code>skills</code></td><td><a class="code" data-src="packages/skill">dsh-skill</a></td><td>filesystem skill loader</td><td>prompt injection</td></tr>
+  <tr><td><code>storage</code></td><td><a class="code" data-src="packages/storage">dsh-storage</a></td><td>local kv/disk providers</td><td>settings, jobs, identity</td></tr>
+</table>
+
+<h2>Reading any new subsystem — the 4-question habit</h2>
+<p>For any package you haven't seen, answer these and you'll have it mapped in minutes:</p>
+<ol>
+  <li><b>What's the seam?</b> Find the <code>ctx.&lt;name&gt;</code> — grep <code>super(ctx, '</code> in its definition package.</li>
+  <li><b>Who provides it?</b> Find the plugin(s) that <code>register</code> or construct the implementation.</li>
+  <li><b>Who consumes it?</b> Find who injects it — usually a <code>dsh-tool-*</code> or another service.</li>
+  <li><b>Which events does it use?</b> grep the package for <code>ctx.on('</code> / <code>ctx.emit('</code> — the event names reveal its extension points.</li>
+</ol>
+
+<h2>Where features actually live</h2>
+<table class="cat">
+  <tr><th>Need</th><th>Lives in</th></tr>
+  <tr><td>Model-facing tools</td><td><code>dsh-tool-*</code> packages — each registers on ctx.tools</td></tr>
+  <tr><td>Model access</td><td><code>dsh-llm</code> + per-provider adapters</td></tr>
+  <tr><td>Turn/step policy</td><td>waterfall hooks on <code>agent/*</code>, <code>tools/*</code></td></tr>
+  <tr><td>Session durability</td><td><code>dsh-session</code> + persistence backends</td></tr>
+  <tr><td>Per-agent customization</td><td>presets + scope layers</td></tr>
+  <tr><td>UI</td><td><code>packages/client/*</code> (browser) + <code>packages/host/*</code> (server) + <code>apps/web</code></td></tr>
+  <tr><td>Composition</td><td><code>packages/bundle/*</code> patches + <code>apps/cli</code></td></tr>
+  <tr><td>External tools</td><td><code>packages/mcp/*</code> — MCP servers bridged into ctx.tools</td></tr>
+</table>
+
+<div class="callout key">
+  <span class="tag">You now hold the map</span>
+  <p>Framework (Cordis) → composition (profiles/patches) → core spine (session, loop, tools, prompt,
+  llm) → capability seams → surfaces. Every file you've seen slots into exactly one of those layers,
+  and every feature is a plugin registering on a seam or a waterfall. That's the whole codebase's
+  shape.</p>
+</div>
+
+<details class="deeper"><summary>Go deeper: how you'd add a capability</summary>
+<div class="deeper-body">
+<p>Say you want a "database query" tool. Following the pattern: (1) author a Definition —
+<code>dsh-db</code> exposing <code>ctx.db</code> with a query contract; (2) a Provider —
+<code>dsh-db-sqlite</code> registering an impl; (3) a Consumer — <code>dsh-tool-db</code> registering
+a <code>ToolDefinition</code> on <code>ctx.tools</code>. Then add a row to a bundle patch so it's
+mounted. No loop changes, no core surgery — the seam pattern is designed so a new capability is
+<i>three packages and a row</i>, all discovered through the same machinery.</p>
+</div></details>
+
+<details class="deeper"><summary>Go deeper: where to look next on your own</summary>
+<div class="deeper-body">
+<p>Suggested deep-dives, ordered by payoff: <b>(1)</b> <code>dsh-subagents</code> spawn/fork — the
+most elegant use of scopes; <b>(2)</b> <code>dsh-compaction</code> — a surface-op plugin that reads
+the log and rewrites the model's view; <b>(3)</b> <code>dsh-mcp</code> — bridging external tools into
+ctx.tools; <b>(4)</b> the web host/client split — how a server-side plugin serves a browser-side
+fiber. Each is a self-contained seam you now have the vocabulary to read.</p>
+</div></details>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> The capability-seam triple is…</p>
+  <div class="opts">
+    <button>define → mock → test</button>
+    <button data-ok>Definition (ctx.* contract) → Provider (registers impl) → Consumer (uses it)</button>
+    <button>input → process → output</button>
+  </div>
+  <p class="why">Definition/Provider/Consumer — and a seam is only complete when all three exist.
+  It's the unit of swappability across the whole repo.</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> To find what a package provides to the rest of the system, the fastest grep is…</p>
+  <div class="opts">
+    <button>grep 'export'</button>
+    <button data-ok>grep 'super(ctx, ' — it reveals the ctx.* service names a package publishes</button>
+    <button>grep 'import'</button>
+  </div>
+  <p class="why"><code>super(ctx, 'name')</code> in a Service constructor is the registration point —
+  it tells you exactly which <code>ctx.*</code> seam(s) a package fills.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Open <a class="code" data-src="packages/README.md">packages/README.md</a> — the canonical package
+group map — and pick one group to read end-to-end. Then check the
+<a class="code" data-src="reference/source-map.html">interactive source map</a> here whenever a
+file's owner isn't obvious.</p>
+
+<button class="mark-done" data-lesson="12"></button>
+
+<nav class="lesson-nav">
+  <a href="0011-scopes-presets.html" rel="prev">← lesson 11: scopes, realms &amp; presets</a>
+  <a href="../index.html" rel="prev">course home — and the reference shelf →</a>
+</nav>
+
+</main>
+
+<template id="t12-cons"><p>What the model-facing surface calls. It knows the contract, never the
+implementation — that's the whole point.</p></template>
+<template id="t12-def"><p>The Service contract + its <code>ctx.*</code> name. Owns the interface every
+provider must satisfy.</p></template>
+<template id="t12-local"><p>Runs commands on the local machine directly — the default provider.</p></template>
+<template id="t12-sand"><p>Wraps the same call in a sandbox profile — the OS-level confinement
+provider.</p></template>
+<template id="t12-ssh"><p>Executes over SSH — same contract, remote machine. The tool doesn't change
+at all.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

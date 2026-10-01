@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 · The session log — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 7 · the session log</span>
+  <span class="spacer"></span>
+  <a href="../reference/event-catalog.html">event catalog</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0007 · core · ~18 min</p>
+<h1>The session log</h1>
+
+<p class="lede">The single most important architectural decision in the harness: <b>a session is an
+append-only event log, and everything else — the model's context, the UI's transcript, replay,
+resume — is a projection of it.</b> There is no "conversation object" being mutated. There is a
+log. This lesson teaches you to read it.</p>
+
+<h2>The core invariant</h2>
+<div class="callout key">
+  <span class="tag">The rule everything obeys</span>
+  <p><b>Model-visible ⟺ logged.</b> Anything that reaches a model request must be reconstructable
+  from the session log. If it's not an event, the model never saw it — and if the model saw it,
+  it's an event. This one rule makes crash-resume, replay testing, and UI rendering all the same
+  mechanism.</p>
+</div>
+
+<h2>The log and the surface are two different things</h2>
+<p>Inside <a class="code" data-src="packages/core/session/src/types.ts" data-lines="275-428">SessionEventMap</a>
+there are ~14 event types, but only five produce <i>model-visible messages</i>. The split is the
+key idea:</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 760 420">
+  <defs><marker id="ah7" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+
+  <rect class="dg-layer" x="10" y="10" width="360" height="360" rx="12"/>
+  <text class="dg-layer-label" x="24" y="30">THE LOG — append-only source of truth</text>
+  <g class="dg-node n-event" transform="translate(40,50)"  data-dg-title="Lifecycle" data-dg-body="#t7-lifecycle"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">turn/start · turn/end · step/start · step/end</text></g>
+  <g class="dg-node n-event" transform="translate(40,88)"  data-dg-title="Request bookkeeping" data-dg-body="#t7-book"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">request/header · request/context</text></g>
+  <g class="dg-node n-event" transform="translate(40,126)" data-dg-title="Tool calls" data-dg-body="#t7-toolcall"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">tool/call — the model asked</text></g>
+  <g class="dg-node n-event" transform="translate(40,164)" data-dg-title="assistant/attempt" data-dg-body="#t7-attempt"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">assistant/attempt — a failed try, logged</text></g>
+  <g class="dg-node n-event" transform="translate(40,202)" data-dg-title="session/end-seed" data-dg-body="#t7-seed"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">session/end-seed — fork/restore boundary</text></g>
+  <g class="dg-node n-core" transform="translate(40,240)" data-dg-title="The five surface events" data-dg-body="#t5ev" data-dg-src="packages/core/session/src/types.ts:439-445|SurfaceEventType">
+    <rect width="300" height="110" rx="9"/><text x="150" y="24" text-anchor="middle">message-producing events</text><text x="150" y="46" text-anchor="middle" class="sub">system/message · developer/message</text><text x="150" y="63" text-anchor="middle" class="sub">user/message · assistant/message</text><text x="150" y="80" text-anchor="middle" class="sub">tool/result</text>
+  </g>
+  <text class="dg-label" x="190" y="365" text-anchor="middle">every event is lossless JSON · seqs are contiguous</text>
+
+  <path class="dg-edge" d="M370 240 L410 240" marker-end="url(#ah7)"/>
+  <text class="dg-label" x="390" y="228" text-anchor="middle" transform="rotate(0)">project</text>
+
+  <rect class="dg-layer" x="410" y="10" width="340" height="360" rx="12"/>
+  <text class="dg-layer-label" x="424" y="30">THE SURFACE — model-visible view</text>
+  <g class="dg-node n-core" transform="translate(440,50)" data-dg-title="surface node 0" data-dg-body="#t7-node0"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">node 0 · system/message</text></g>
+  <g class="dg-node n-core" transform="translate(440,92)" data-dg-title="user turns" data-dg-body="#t7-user"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">user/message × N</text></g>
+  <g class="dg-node n-core" transform="translate(440,134)" data-dg-title="assistant turns" data-dg-body="#t7-asst"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">assistant/message × N</text></g>
+  <g class="dg-node n-core" transform="translate(440,176)" data-dg-title="tool results" data-dg-body="#t7-toolres"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">tool/result × N</text></g>
+  <text class="dg-label" x="580" y="240" text-anchor="middle">ordered seq list — the model's context</text>
+  <text class="dg-label" x="580" y="260" text-anchor="middle">a compaction replaces a span of nodes</text>
+  <text class="dg-label" x="580" y="280" text-anchor="middle">with a synthesized summary node</text>
+  <g class="dg-node n-cordis" transform="translate(440,310)" data-dg-title="deriveMessages" data-dg-body="#t7-derive" data-dg-src="packages/core/session/src/surface.ts|surface.ts">
+    <rect width="280" height="40" rx="9"/><text x="140" y="25" text-anchor="middle">deriveMessages(log) → the request payload</text>
+  </g>
+</svg>
+<figcaption>The log is the truth; the surface is a derived, ordered subset of message-producing
+events. Compaction and system-prompt updates are <i>surface operations</i>, not log edits — the
+log is never rewritten.</figcaption>
+</figure>
+
+<h2>Why split log and surface?</h2>
+<p>Because the model should never see bookkeeping. A <code>step/start</code> matters to replay and
+the UI; it's meaningless to the model. And when a conversation outgrows the context window, you
+want to say "replace these 40 messages with this summary" <b>without rewriting history</b> — the
+old events stay in the log (so resume and audit still work), but the surface swaps which nodes the
+model sees.</p>
+
+<h2>The events that matter most</h2>
+<table class="cat">
+  <tr><th>Event</th><th>Model-visible?</th><th>What it records</th></tr>
+  <tr><td><code>turn/start</code> · <code>turn/end</code></td><td>no</td><td>Bracket one turn; <code>turn/end</code> carries the <code>TurnEndReason</code> (completed/aborted/blocked/error/max-tokens/interrupted/forked)</td></tr>
+  <tr><td><code>step/start</code> · <code>step/end</code></td><td>no</td><td>One step = one model call + the tool executions it requested</td></tr>
+  <tr><td><code>request/header</code></td><td>no</td><td>Full call config + tool schemas for the next request — the log-only snapshot that lets replay rebuild a request</td></tr>
+  <tr><td><code>request/context</code></td><td>no</td><td>Provider/model/context-window route metadata, logged when the route changes</td></tr>
+  <tr><td><code>system/message</code></td><td>yes</td><td>The rendered system prompt (surface node 0)</td></tr>
+  <tr><td><code>user/message</code></td><td>yes</td><td>A human prompt or a synthetic injection (file-change notice, skill content, cron)</td></tr>
+  <tr><td><code>assistant/message</code></td><td>yes</td><td>One step's settled assistant output — text, reasoning, tool calls — plus its exact raw stream</td></tr>
+  <tr><td><code>assistant/attempt</code></td><td>no</td><td>A failed/cancelled attempt's stream — logged so retries don't fabricate history</td></tr>
+  <tr><td><code>tool/call</code> · <code>tool/result</code></td><td>yes (result)</td><td>The model's request and the tool's model-facing reply</td></tr>
+  <tr><td><code>session/end-seed</code></td><td>no</td><td>The inherited/live boundary in a forked or restored log</td></tr>
+</table>
+
+<h2>What this buys the whole system</h2>
+<ul>
+  <li><b>Resume for free</b> — a crashed session's log is the state; reopening it replays events and the next step picks up mid-turn (an orphaned open turn is closed with <code>interrupted</code>).</li>
+  <li><b>Replay for testing</b> — recorded logs feed the snapshot harness; canned streams drive the real loop.</li>
+  <li><b>The UI for free</b> — the web transcript is just "render the log's surface + lifecycle events".</li>
+  <li><b>Fork/subagent seeding</b> — <code>buildForkSeed</code> copies a prefix, tags the cut with <code>session/end-seed</code>, and the child diverges from there.</li>
+  <li><b>Compaction</b> — replace a span of surface nodes with one summary node, keeping the log intact underneath.</li>
+</ul>
+
+<div class="callout warn">
+  <span class="tag">Format version</span>
+  <p>The log is durable on disk, so its format is versioned: <code>SESSION_FORMAT_VERSION = 4</code>
+  (<a class="code" data-src="packages/core/session/src/types.ts" data-lines="89">types.ts:89</a>).
+  The rule for bumping it is unusually strict — only <i>structural</i> changes (header, envelope,
+  core event semantics, the surface mechanism) bump; a new ordinary event type does not, because
+  the <code>ignorable</code> envelope guard covers vocabulary growth. This discipline is what makes
+  "the log is the truth" safe across versions.</p>
+</div>
+
+<details class="deeper"><summary>Go deeper: the surface op mechanism</summary>
+<div class="deeper-body">
+<p>A surface event doesn't just appear — it carries a <code>surfaceOp</code> describing how to place
+it: append as a new node, replace an existing node's content, or clear nodes. A
+<code>SessionMessageProjection</code> (<a class="code" data-src="packages/core/session/src/surface.ts" data-lines="35-46">surface.ts:35-46</a>)
+is the plugin-owned interpreter for an event that changes existing messages — compaction uses it to
+swap a span of nodes for a summary without touching the log. The surface is a materialized view;
+the log is the database.</p>
+</div></details>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> The model's context for the next request is derived from…</p>
+  <div class="opts">
+    <button>a Conversation object mutated as turns run</button>
+    <button data-ok>the session log's surface — an ordered set of message-producing events</button>
+    <button>a separate "prompt history" file</button>
+  </div>
+  <p class="why">No mutable conversation exists. <code>deriveMessages</code> reads the log's surface
+  nodes in order; compaction and prompt updates are surface ops over those nodes.</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> A model call fails mid-stream and the step retries. Where does the failed attempt go?</p>
+  <div class="opts">
+    <button>It's discarded — only success is logged</button>
+    <button data-ok>Logged as assistant/attempt — failed tries are durable so replay doesn't fabricate history</button>
+    <button>Logged as an assistant/message with an error flag</button>
+  </div>
+  <p class="why">The rule is "everything model-visible is logged" — and a failed attempt is real
+  history. <code>assistant/attempt</code> preserves its stream so the log stays lossless; it just
+  doesn't contribute a surface message.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Read <a class="code" data-src="packages/core/session/src/types.ts" data-lines="275-428">SessionEventMap</a>
+end-to-end — every JSDoc comment is a contract, and this file is the single best source of "what
+can be in a session". Then skim <code>surface.ts</code> for the projection layer.</p>
+
+<button class="mark-done" data-lesson="7"></button>
+
+<nav class="lesson-nav">
+  <a href="0006-boot-trace.html" rel="prev">← lesson 6: the boot trace</a>
+  <a href="0008-agent-loop.html" rel="next">lesson 8: the agent loop →</a>
+</nav>
+
+</main>
+
+<template id="t7-lifecycle"><p><code>turn/start/end</code> bracket a turn; <code>step/start/end</code>
+bracket a model call + its tools. Log-only — the model never sees them, but replay, resume, and the
+UI all depend on them.</p></template>
+<template id="t7-book"><p><code>request/header</code> snapshots call config + tool schemas;
+<code>request/context</code> snapshots the provider route. Replay rebuilds the exact request from
+these.</p></template>
+<template id="t7-toolcall"><p>The model asked for a tool: name + raw arguments JSON + a
+<code>callId</code> that pairs with its <code>tool/result</code>.</p></template>
+<template id="t7-attempt"><p>A failed/retried/cancelled model attempt that committed no surface
+message — logged so the history is lossless and replay doesn't invent what didn't happen.</p></template>
+<template id="t7-seed"><p>The boundary between inherited/forked history and live work — a fork
+child's exact cut point. Log-only; only the Session constructor and <code>buildForkSeed</code> write
+it.</p></template>
+<template id="t5ev"><p>Only these five produce model messages: <code>system/message</code> (the
+prompt), <code>developer/message</code> (per-step context), <code>user/message</code>,
+<code>assistant/message</code>, <code>tool/result</code>. They're the union
+<code>SurfaceEventType</code> — the only events that may carry a <code>surfaceOp</code>.</p></template>
+<template id="t7-node0"><p>Node 0 is always the rendered system prompt — the loop appends it before
+the step's first user message.</p></template>
+<template id="t7-user"><p>Human prompts and synthetic injections both land here as
+<code>user/message</code> — <code>source</code> distinguishes them.</p></template>
+<template id="t7-asst"><p>One per settled step — the assistant's text + reasoning + tool-call blocks,
+plus the exact raw stream that produced it.</p></template>
+<template id="t7-toolres"><p>Each tool call's model-facing result, in model order.</p></template>
+<template id="t7-derive"><p>The loop reads the surface's ordered node list, resolves each node's
+message, and assembles the request payload — never touching raw events the model shouldn't see.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

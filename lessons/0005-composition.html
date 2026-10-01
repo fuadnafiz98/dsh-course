@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 · cordis.yml, patches &amp; profiles — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 5 · composition: YAML to app</span>
+  <span class="spacer"></span>
+  <a href="../reference/base-patch-tour.html">base patch tour</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0005 · composition · ~18 min</p>
+<h1>cordis.yml, patches &amp; profiles</h1>
+
+<p class="lede">You've seen that <i>running</i> a plugin creates a fiber. Now the question before it:
+<b>who decides which plugins get mounted, and with what config?</b> In dsh the answer is never
+code — it's a stack of YAML patch layers. This lesson teaches you to read that stack.</p>
+
+<h2>The vocabulary in one table</h2>
+<table class="cat">
+  <tr><th>Term</th><th>What it is</th><th>Concrete example</th></tr>
+  <tr><td><b>Entry / row</b></td><td>One line in a config tree: <code>id</code>, <code>name</code> (module specifier), optional <code>config</code>, optional <code>disabled</code></td><td><code>{id: tool-bash, name: '@deepseek-ai/dsh-tool-bash'}</code></td></tr>
+  <tr><td><b><code>cordis.yml</code></b></td><td>A file listing entries — the Loader's input</td><td>the profile root (always <code>[]</code> in dsh)</td></tr>
+  <tr><td><b><code>cordis.patch.yml</code></b></td><td>A patch: a list of <code>insert:</code> rows plus row edits by <code>id</code></td><td><a class="code" data-src="packages/bundle/base/cordis.patch.yml">dsh-base's patch</a></td></tr>
+  <tr><td><b>Bundle</b></td><td>A shipped patch + the code its rows mount. A distribution unit.</td><td><code>dsh-base</code>, <code>dsh-web-app</code>, <code>dsh-headless</code></td></tr>
+  <tr><td><b>Profile</b></td><td>A directory naming which bundles to stack + the user's own patch</td><td><code>web</code>, <code>headless</code>, <code>sdk</code>, <code>acp</code></td></tr>
+</table>
+
+<h2>A patch row, exactly</h2>
+<p>Read the header comment of
+<a class="code" data-src="packages/bundle/base/cordis.patch.yml" data-lines="1-13">dsh-base's patch</a>
+— it's the best-written documentation in the repo. Its rows look like:</p>
+
+<pre><code>- insert:
+    - id: plugin-manager
+      name: '@deepseek-ai/dsh-plugin-manager'
+      disabled: !!js "!ctx.get('profileContext')"     # only on real launches
+
+    - id: hmr
+      name: '@deepseek-ai/dsh-hmr'
+      disabled: !!js "!ctx.get('profileContext')"
+      config:
+        root: []
+
+    - id: llm
+      name: '@deepseek-ai/dsh-llm'
+
+    - id: tool-bash
+      name: '@deepseek-ai/dsh-tool-bash'
+      disabled: !!js process.platform === 'win32'    # bash needs a real shell
+</code></pre>
+
+<p>Three things to notice:</p>
+<ul>
+  <li><b><code>disabled</code> is a predicate</b>, not just <code>true/false</code>.
+  <code>!!js "!ctx.get('profileContext')"</code> means "skip this row when there's no profile context"
+  — i.e. on <code>--dump-config</code> dry-runs, plugin-manager and HMR don't exist.</li>
+  <li><b><code>!!js</code> is real JavaScript</b>, evaluated at load time with the boot-time context
+  available as <code>ctx</code>. It's how platform gating (<code>process.platform</code>),
+  environment reading, and "only when launched for real" are expressed declaratively.</li>
+  <li><b><code>config</code> is opaque YAML</b> handed verbatim to the plugin — the plugin's
+  <code>Config</code> schema validates it at mount, so a bad value fails loud at boot, not mid-turn.</li>
+</ul>
+
+<div class="callout key">
+  <span class="tag">The one rule</span>
+  <p>A patch <b>replaces a row's whole <code>config</code></b> — it does not merge into it. This
+  is why mode-specific config lives in mode bundles, not in dsh-base: a row can only ever have
+  <i>one</i> config value, and the last patch layer to address that row's <code>id</code> wins.</p>
+</div>
+
+<h2>The patch stack</h2>
+<p><a class="code" data-src="apps/cli/src/profile-boot.ts" data-lines="175-208">composeProfile()</a>
+builds the effective tree by layering patches in a fixed order. Read the JSDoc on that function —
+it's the definitive statement:</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 760 330">
+  <defs><marker id="ah5" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+  <text class="dg-label" x="380" y="24" text-anchor="middle">patches apply bottom-up; later layers override earlier by row id</text>
+
+  <g class="dg-node n-cordis" transform="translate(240,40)" data-dg-title="Layer 1: bundle patches" data-dg-body="#t5-bundles" data-dg-src="packages/bundle/base/cordis.patch.yml|dsh-base cordis.patch.yml">
+    <rect width="280" height="44" rx="9"/><text x="140" y="27" text-anchor="middle">1 · bundles (in profile order)</text>
+  </g>
+  <g class="dg-node n-cordis" transform="translate(240,96)" data-dg-title="Layer 2: profile patch" data-dg-body="#t5-profile">
+    <rect width="280" height="44" rx="9"/><text x="140" y="27" text-anchor="middle">2 · profile's cordis.patch.yml</text>
+  </g>
+  <g class="dg-node n-cordis" transform="translate(240,152)" data-dg-title="Layer 3: home patch" data-dg-body="#t5-home">
+    <rect width="280" height="44" rx="9"/><text x="140" y="27" text-anchor="middle">3 · $DSH_HOME/cordis.patch.yml</text>
+  </g>
+  <g class="dg-node n-cordis" transform="translate(240,208)" data-dg-title="Layer 4: --patch overlays" data-dg-body="#t5-overlay">
+    <rect width="280" height="44" rx="9"/><text x="140" y="27" text-anchor="middle">4 · --patch overlays</text>
+  </g>
+  <path class="dg-edge" d="M380 84 L380 94" marker-end="url(#ah5)"/>
+  <path class="dg-edge" d="M380 140 L380 150" marker-end="url(#ah5)"/>
+  <path class="dg-edge" d="M380 196 L380 206" marker-end="url(#ah5)"/>
+  <path class="dg-edge" d="M380 252 L380 262" marker-end="url(#ah5)"/>
+  <g class="dg-node n-core" transform="translate(240,268)" data-dg-title="The effective tree" data-dg-body="#t5-effective" data-dg-src="apps/cli/src/profile-boot.ts:167-173|prepareProfile()">
+    <rect width="280" height="48" rx="9"/><text x="140" y="20" text-anchor="middle">effective cordis tree</text><text x="140" y="38" text-anchor="middle" class="sub">→ handed to Loader as the root</text>
+  </g>
+
+  <text class="dg-label" x="640" y="64">~80 rows from dsh-base</text>
+  <text class="dg-label" x="640" y="120">user's own rows</text>
+  <text class="dg-label" x="640" y="176">machine-local prefs</text>
+  <text class="dg-label" x="640" y="232">per-invocation</text>
+</svg>
+<figcaption>Four layers, last-write-wins per row. <code>dsh --profile web --dump-config</code>
+prints the result — run it, it's free.</figcaption>
+</figure>
+
+<h2>Where the root file fits</h2>
+<p>There's one subtlety: the profile's actual <code>cordis.yml</code> on disk is literally
+<code>[]</code> — an empty list — and <a class="code" data-src="apps/cli/src/profile-boot.ts" data-lines="152-173">prepareProfile()</a>
+rewrites it to <code>[]</code> on every boot. Why? Because everything arrives via <i>patches</i>,
+and the Loader needs a real file on disk only to anchor module resolution (<code>baseUrl</code>).
+The comment on lines 152–164 explains it precisely: letting plugin self-disposal write back to
+the root would bake bundle inserts into the file and duplicate them next boot.</p>
+
+<div class="callout key">
+  <span class="tag">Mental model</span>
+  <p>Think of the root <code>cordis.yml</code> as a <b>projection</b>, not a source. The source of
+  truth is the patch stack; the root file exists because the Loader needs a filesystem anchor and
+  a place to write back runtime mutations. dsh deliberately keeps it empty so patches stay the
+  only composers.</p>
+</div>
+
+<h2>Profiles are just "which bundles"</h2>
+<p>A profile is a directory under <code>$DSH_HOME/profiles/&lt;name&gt;/</code> containing
+<code>dsh.profile.yml</code> (bundle list) and <code>cordis.patch.yml</code> (the user's own rows).
+The shipped templates are in <code>packages/bundle/*/</code>:</p>
+
+<ul>
+  <li><b><code>web</code></b> = <code>dsh-base</code> + <code>dsh-web-app</code> (HTTP server, host rows, ~60 client rows)</li>
+  <li><b><code>headless</code></b> = <code>dsh-base</code> + <code>dsh-headless</code> (a one-shot runner)</li>
+  <li><b><code>sdk</code></b> = <code>dsh-base</code> + <code>dsh-sdk-app</code> (JSON-RPC server)</li>
+  <li><b><code>sdk-minimal</code></b> = <code>dsh-sdk-minimal</code> only — deliberately skips dsh-base, the minimal embeddable tree</li>
+  <li><b><code>acp</code></b> = <code>dsh-base</code> + <code>dsh-acp-app</code> (Agent Client Protocol)</li>
+</ul>
+
+<p>So "dsh web vs dsh headless" is literally "which bundle stack". Same engine; the outermost
+rows differ.</p>
+
+<details class="deeper"><summary>Go deeper: the Loader + Include split</summary>
+<div class="deeper-body">
+<p>Two vendored packages cooperate: <b>Loader</b>
+(<a class="code" data-src="vendor/loader/src/index.ts">vendor/loader/src</a>) turns entry rows into
+fibers — it resolves module specifiers through the package-resolution layer
+(<code>dsh-plugin-packages</code>), handles <code>disabled</code> predicates, and maintains the
+tree. <b>Include</b> (<a class="code" data-src="vendor/include/src/index.ts">vendor/include/src</a>)
+parses a <code>cordis.yml</code> into rows and applies patch lists — it's the pure-YAML half.
+Keeping them separate means patch semantics (last-write-wins, insert, replace) are testable
+without any module loading. The product-level API is <code>boot()</code> in
+<a class="code" data-src="packages/boot/app-boot/src/index.ts">packages/boot/app-boot</a> — it
+creates the root Context, mounts Loader, hands the composed tree to Include, waits for settlement.</p>
+</div></details>
+
+<details class="deeper"><summary>Go deeper: what --dump-config actually shows</summary>
+<div class="deeper-body">
+<p><code>dsh --profile web --dump-config</code> boots just far enough to compose the tree — it
+mounts Loader, applies all patch layers, prints the effective <code>cordis.yml</code>, and exits
+before any plugin's <code>apply()</code> runs. That's why <code>!!js "!ctx.get('profileContext')"</code>
+rows vanish in dumps: no profile context is provided in dump mode. It's the fastest way to answer
+"what would this profile actually load?" — do it before reading code.</p>
+</div></details>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> You want to disable <code>tool-bash</code> for your own profile without touching dsh-base. Where does that edit go?</p>
+  <div class="opts">
+    <button>Edit dsh-base's patch in place</button>
+    <button data-ok>A row in your profile's cordis.patch.yml targeting id 'tool-bash' with disabled: true</button>
+    <button>A --patch overlay that deletes the row</button>
+  </div>
+  <p class="why">Patches address rows by <code>id</code>; later layers win. Your profile patch is
+  layer 2 — it overrides the bundle layer for that row. (A <code>--patch</code> overlay would also
+  work, but it's for per-invocation, not durable profile config.)</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> Why is the profile root <code>cordis.yml</code> always <code>[]</code>?</p>
+  <div class="opts">
+    <button>It's a bug that gets fixed at boot</button>
+    <button data-ok>Patches do all composition; the empty file is just the Loader's filesystem anchor</button>
+    <button>It disables all plugins by default</button>
+  </div>
+  <p class="why">Composition lives entirely in patch layers. The empty root is a deliberate
+  projection — written each boot — so plugin-driven write-backs never duplicate bundle inserts.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Skim <a class="code" data-src="packages/bundle/base/cordis.patch.yml">dsh-base's full patch</a>
+start to finish — every row is one plugin you'll meet in later lessons. Then read
+<a class="code" data-src="apps/cli/src/profile-boot.ts" data-lines="244-319">runProfile()</a> to
+see the stack become a Context.</p>
+
+<button class="mark-done" data-lesson="5"></button>
+
+<nav class="lesson-nav">
+  <a href="0004-events.html" rel="prev">← lesson 4: the five dispatch modes</a>
+  <a href="0006-boot-trace.html" rel="next">lesson 6: the boot trace →</a>
+</nav>
+
+</main>
+
+<template id="t5-bundles"><p>Each bundle named by the profile contributes its
+<code>cordis.patch.yml</code>. <code>dsh-base</code> alone inserts ~80 rows — the core spine plus
+every capability seam with its default provider.</p></template>
+<template id="t5-profile"><p><code>$DSH_HOME/profiles/&lt;name&gt;/cordis.patch.yml</code> — the
+user's durable customizations for this profile: extra rows, <code>disabled</code> flips, config
+overrides.</p></template>
+<template id="t5-home"><p><code>$DSH_HOME/cordis.patch.yml</code> — applies to every profile;
+machine-local preferences. Outranks the per-profile layer.</p></template>
+<template id="t5-overlay"><p><code>--patch overlay.yml</code> files — argv-order, per-invocation
+overrides. Highest precedence.</p></template>
+<template id="t5-effective"><p>The composed result handed to Loader as the root config. The
+<code>[]</code> on disk is just the anchor — this in-memory tree is what mounts.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

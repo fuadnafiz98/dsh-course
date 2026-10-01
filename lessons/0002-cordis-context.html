@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 · Context: the shared world — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 2 · context: the shared world</span>
+  <span class="spacer"></span>
+  <a href="../reference/cordis-api.html">cordis cheat sheet</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0002 · cordis · ~15 min</p>
+<h1>Context: the shared world</h1>
+
+<p class="lede">Everything in Cordis hangs off one object: the <b>context</b>, always named
+<code>ctx</code>. It's a service directory, an event bus, and a plugin launcher in one.
+This lesson is about its first job — how services get onto <code>ctx</code> and how other
+plugins find them.</p>
+
+<h2><code>ctx</code> is a directory, not a god object</h2>
+<p>When you write <code>ctx.tools</code> or <code>ctx.llm</code>, you're not touching a hardcoded
+property. <code>Context</code> instances are wrapped in a JavaScript
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy" target="_blank" rel="noopener"><code>Proxy</code></a>:
+a read of <code>ctx.&lt;name&gt;</code> is forwarded to the <b>reflect layer</b>, which looks up
+which plugin currently provides a service under that name and returns it.</p>
+
+<pre><code>// vendor/cordis/src/context.ts — the root context wires itself up
+const self = new Proxy&lt;this&gt;(this, ReflectService.handler)
+this.root = self
+this.reflect = new ReflectService(self)   // the service store
+this.registry = new RegistryService(self) // ctx.plugin(), ctx.inject()
+this.events = new EventsService(self)     // ctx.on(), ctx.emit(), ...
+this.logger = new LoggerService(self)
+return self                               // callers get the PROXY</code></pre>
+<p class="small muted">— <a class="code" data-src="vendor/cordis/src/context.ts" data-lines="71-84">vendor/cordis/src/context.ts:71-84</a></p>
+
+<p>Two consequences follow:</p>
+<ul>
+  <li><b>Names are stable, implementations are not.</b> <code>ctx.shell</code> means "whoever currently
+  provides the shell service" — a local executor today, an SSH executor in a different profile.
+  Consumers code against the name, never the class.</li>
+  <li><b>Reads can fail.</b> If nothing provides <code>ctx.tools</code>, the proxy throws.
+  That's intentional — a missing dependency is a loud boot failure, not a silent <code>undefined</code>
+  — and it's why the next lesson's <code>inject</code> mechanism exists.</li>
+</ul>
+
+<h2>How a service gets onto <code>ctx</code></h2>
+<p>The base class is <code>Service</code>. Its constructor does the registration for you:</p>
+
+<pre><code>export abstract class Service&lt;T = never&gt; {
+  constructor(protected ctx: Context, name: string) {
+    ...
+    self.ctx.reflect.provide(name, self, this[symbols.check])
+    return self   // (possibly a callable instance, e.g. ctx.logger("x"))
+  }
+}</code></pre>
+<p class="small muted">— <a class="code" data-src="vendor/cordis/src/service.ts" data-lines="42-59">vendor/cordis/src/service.ts:42-59</a></p>
+
+<p>So a real service in the wild — the session store — is:</p>
+
+<pre><code>export class SessionStore extends Service {
+  constructor(ctx: Context) {
+    super(ctx, 'sessions')   // ← now ctx.sessions === this, for every plugin
+    ...
+  }
+}</code></pre>
+<p class="small muted">— <a class="code" data-src="packages/core/session/src/index.ts" data-lines="925-963">packages/core/session/src/index.ts:925-963</a></p>
+
+<p>And removal is automatic: the <code>provide()</code> call is recorded as an <b>effect owned by the
+plugin's fiber</b>. When the fiber unloads (config reload, HMR, shutdown), the service is unregistered
+with it. Nothing to clean up by hand — lesson 3 goes deep on this.</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 740 300">
+  <defs><marker id="ah2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+  <g class="dg-node n-core" transform="translate(40,40)" data-dg-title="A provider plugin" data-dg-body="#t2-provider" data-dg-src="packages/core/session/src/index.ts:925|SessionStore">
+    <rect width="170" height="50" rx="9"/><text x="85" y="22" text-anchor="middle">plugin A</text><text x="85" y="38" text-anchor="middle" class="sub">class SessionStore</text>
+  </g>
+  <g class="dg-node n-cordis" transform="translate(300,40)" data-dg-title="ctx.reflect — the service store" data-dg-body="#t2-reflect" data-dg-src="vendor/cordis/src/reflect.ts|ReflectService">
+    <rect width="170" height="50" rx="9"/><text x="85" y="22" text-anchor="middle">reflect store</text><text x="85" y="38" text-anchor="middle" class="sub">name → impl (by realm key)</text>
+  </g>
+  <g class="dg-node n-tool" transform="translate(560,40)" data-dg-title="A consumer plugin" data-dg-body="#t2-consumer" data-dg-src="packages/core/agent-loop/src/index.ts|dsh-agent-loop">
+    <rect width="150" height="50" rx="9"/><text x="75" y="22" text-anchor="middle">plugin B</text><text x="75" y="38" text-anchor="middle" class="sub">reads ctx.sessions</text>
+  </g>
+  <path class="dg-edge" d="M210 65 L296 65" marker-end="url(#ah2)"/>
+  <text class="dg-label" x="253" y="56" text-anchor="middle">provide('sessions')</text>
+  <path class="dg-edge" d="M556 65 L474 65" marker-end="url(#ah2)"/>
+  <text class="dg-label" x="518" y="56" text-anchor="middle">ctx.sessions</text>
+
+  <g class="dg-node n-cordis" transform="translate(300,140)" data-dg-title="The ctx proxy" data-dg-body="#t2-proxy" data-dg-src="vendor/cordis/src/context.ts:42-84|class Context">
+    <rect width="170" height="44" rx="9"/><text x="85" y="27" text-anchor="middle">ctx (Proxy)</text>
+  </g>
+  <path class="dg-edge dash" d="M385 90 L385 138"/>
+  <text class="dg-label" x="396" y="118">read ctx.* → lookup</text>
+
+  <g class="dg-node n-event" transform="translate(60,210)" data-dg-title="internal/service &amp; internal/get" data-dg-body="#t2-internal">
+    <rect width="280" height="60" rx="9"/><text x="140" y="24" text-anchor="middle">every provide / read is an internal event</text><text x="140" y="44" text-anchor="middle" class="sub">plugins can observe or intercept even the directory itself</text>
+  </g>
+  <path class="dg-edge dash" d="M300 162 L340 200"/>
+  <text class="dg-label" x="430" y="240">the directory itself is extensible — that's the whole trick</text>
+</svg>
+<figcaption>Provider → store → proxy → consumer. Nobody imports anybody; names are the contract.</figcaption>
+</figure>
+
+<h2>Three ways plugins consume a service</h2>
+<table class="cat">
+  <tr><th style="width:150px">Form</th><th>Meaning</th><th>Use when</th></tr>
+  <tr><td><code>ctx.tools</code></td><td>Read through the proxy on a context that declared the dep via <code>inject</code></td><td>You required it — activation already waited for it</td></tr>
+  <tr><td><code>ctx.get('tools')</code></td><td>Strict read of the global store; <code>undefined</code> if absent</td><td>Optional dependencies — "if a job registry exists, use it"</td></tr>
+  <tr><td><code>ctx.inject(['sessions'], cb)</code></td><td>Run <code>cb</code> (in a fresh child context) only once every dep exists; re-run if one is replaced</td><td>Deffered work that must wait on a service</td></tr>
+</table>
+
+<div class="callout warn">
+  <span class="tag">A real pitfall the codebase documents</span>
+  <p><code>ctx.foo</code> (proxy property) and <code>ctx.get('foo')</code> are NOT the same read:
+  the proxy honors per-context <b>isolation realms</b> (below), while <code>ctx.get</code> reads the
+  global store. That's why packages/AGENTS.md says <i>"Optional services use <code>ctx.get(name)</code>;
+  reserve <code>ctx.&lt;name&gt;</code> for declared injections."</i> There is an actual
+  <a class="code" data-src="docs/postmortem/0001-acp-default-export-drops-inject.md">postmortem</a>
+  about the day this bit someone.</p>
+</div>
+
+<h2>Child contexts: <code>extend</code>, <code>isolate</code>, <code>intercept</code></h2>
+<p>The last piece of <code>Context</code> is that it's a <b>tree</b>, not a singleton.
+<a class="code" data-src="vendor/cordis/src/context.ts" data-lines="99-107">ctx.extend(meta)</a>
+creates a child that prototypally inherits the parent but owns extra keys:</p>
+
+<pre><code>const child = ctx.extend({ answer: 42 })  // child sees parent's services + its own 'answer'</code></pre>
+
+<p>Two specialized variants matter enormously in dsh:</p>
+<ul>
+  <li><b><code>ctx.isolate(name, label)</code></b> — below the child, the service <code>name</code>
+  resolves in a fresh <b>realm</b>: a provider mounted there doesn't overwrite the parent's
+  service of the same name. This is how two agents in one process get <i>different</i> tool sets or
+  different compaction services — lesson 11 builds the whole preset system on it.</li>
+  <li><b><code>ctx.intercept(name, config)</code></b> — injects extra config into every plugin
+  under the child that consumes service <code>name</code>. It's how <code>inject: { llm: {...} }</code>
+  passes per-plugin config into a shared service.</li>
+</ul>
+
+<figure class="diagram">
+<svg viewBox="0 0 720 210">
+  <g class="dg-node n-cordis" transform="translate(270,16)" data-dg-title="Root context" data-dg-body="#t2-root">
+    <rect width="180" height="42" rx="9"/><text x="90" y="26" text-anchor="middle">root ctx</text>
+  </g>
+  <path class="dg-edge" d="M320 58 L210 96"/>
+  <path class="dg-edge" d="M420 58 L510 96"/>
+  <g class="dg-node n-cordis" transform="translate(120,100)" data-dg-title="ctx.extend({...})" data-dg-body="#t2-extend" data-dg-src="vendor/cordis/src/context.ts:99-107|extend()">
+    <rect width="190" height="46" rx="9"/><text x="95" y="20" text-anchor="middle">child A: fiber's ctx</text><text x="95" y="36" text-anchor="middle" class="sub">inherits + own keys (e.g. fiber)</text>
+  </g>
+  <g class="dg-node n-core" transform="translate(420,100)" data-dg-title="ctx.isolate('compaction')" data-dg-body="#t2-isolate" data-dg-src="vendor/cordis/src/context.ts:121-125|isolate()">
+    <rect width="210" height="46" rx="9"/><text x="105" y="20" text-anchor="middle">child B: isolated realm</text><text x="105" y="36" text-anchor="middle" class="sub">ctx.compaction resolves elsewhere</text>
+  </g>
+  <path class="dg-edge dash" d="M515 146 L515 168"/>
+  <text class="dg-label" x="515" y="188" text-anchor="middle">two agents, two realms, one process — lesson 11</text>
+</svg>
+<figcaption>Same root, scoped children. Parent sees through the child; the child can shadow what
+the parent sees.</figcaption>
+</figure>
+
+<h2>Where this shows up in dsh</h2>
+<ul>
+  <li><code>ctx.sessions</code>, <code>ctx.tools</code>, <code>ctx.llm</code>, <code>ctx.agents</code>,
+  <code>ctx.systemPrompt</code> — the core spine, each a <code>Service</code> subclass provided by one
+  row in the base patch.</li>
+  <li>Every capability seam — <code>ctx.shell</code>, <code>ctx.fs</code>, <code>ctx.subagents</code> —
+  is the same mechanism, designed so the provider can be swapped per deployment or <i>per agent</i>.</li>
+  <li>Host services like <code>ctx.profileContext</code> are just <code>ctx.provide()</code> calls made
+  by the launcher before the tree mounts
+  (<a class="code" data-src="apps/cli/src/profile-boot.ts" data-lines="296-304">profile-boot.ts:296-304</a>).</li>
+</ul>
+
+<details class="deeper"><summary>Go deeper: how the proxy actually resolves a read</summary>
+<div class="deeper-body">
+<p><code>ctx.sessions</code> hits <code>ReflectService.handler</code>'s <code>get</code> trap
+(<a class="code" data-src="vendor/cordis/src/reflect.ts">vendor/cordis/src/reflect.ts</a>). The lookup
+key isn't the string <code>'sessions'</code> — it's the <b>realm symbol</b> stored in
+<code>ctx[Context.isolate]['sessions']</code> (defaulting to a shared symbol). That indirection is
+what makes <code>isolate()</code> a one-line realm switch: a child context swaps which symbol
+<code>'sessions'</code> maps to, and the same property read returns a different implementation.
+Reads can also be intercepted: <code>internal/get</code>/<code>internal/set</code> are waterfall
+events that plugins can hook — the service directory itself is extensible.</p>
+</div></details>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> Plugin B needs the session store. What does it import?</p>
+  <div class="opts">
+    <button data-ok>Nothing — it declares `inject: ['sessions']` and reads `ctx.sessions`</button>
+    <button>`import { SessionStore } from 'dsh-session'`</button>
+    <button>`require('session')` then `new SessionStore()`</button>
+  </div>
+  <p class="why"><b>Right.</b> Consumers depend on the service <i>name</i>, never the class.
+  Importing the concrete provider would weld B to one implementation and break the seam the whole
+  architecture exists for.</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> What does <code>ctx.isolate('tools')</code> give you?</p>
+  <div class="opts">
+    <button>A sandbox where ctx.tools throws</button>
+    <button data-ok>A child context where the 'tools' service resolves in a private realm</button>
+    <button>A deep copy of the tools registry</button>
+  </div>
+  <p class="why">Isolation forks <i>resolution</i>, not the service. Inside the child,
+  <code>ctx.tools</code> can be a different registry (a per-agent tool set) while the parent's
+  <code>ctx.tools</code> is untouched. Presets rely on this — lesson 11.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Read <a class="code" data-src="vendor/cordis/src/context.ts">vendor/cordis/src/context.ts</a>
+top to bottom — it's only ~150 lines and it's the foundation under everything else.
+Questions? Ask me.</p>
+
+<button class="mark-done" data-lesson="2"></button>
+
+<nav class="lesson-nav">
+  <a href="0001-the-shape-of-dsh.html" rel="prev">← lesson 1: the shape of dsh</a>
+  <a href="0003-plugins-fibers-effects.html" rel="next">lesson 3: plugins, fibers &amp; effects →</a>
+</nav>
+
+</main>
+
+<template id="t2-provider"><p>A <code>Service</code> subclass registers itself in its constructor:
+<code>super(ctx, 'sessions')</code> → <code>ctx.reflect.provide('sessions', this)</code>. The provide
+is an owned effect — it disappears when the fiber unloads.</p></template>
+<template id="t2-reflect"><p>The reflect layer keeps <code>realm-symbol → { fiber, impl }</code>.
+The realm symbol (not the name string) is what a lookup resolves, which is what makes
+<code>isolate()</code> cheap.</p></template>
+<template id="t2-consumer"><p>Reads <code>ctx.sessions</code> — the proxy resolves it to whoever
+currently provides that name in this context's realm. If the provider unloads, the read throws;
+declared <code>inject</code> deps make the consumer wait instead.</p></template>
+<template id="t2-proxy"><p>The object every plugin receives. Property reads go through
+<code>internal/get</code> (a waterfall!), so even service resolution is hookable.</p></template>
+<template id="t2-internal"><p><code>internal/service</code>, <code>internal/get</code>,
+<code>internal/set</code>, <code>internal/listener</code>, <code>internal/plugin</code>,
+<code>internal/status</code> — Cordis exposes its own machinery as events, which is how the
+loader, HMR, and the inspect tools all work without special-casing.</p></template>
+<template id="t2-root"><p>Created once per app by <code>new Context()</code> in boot. Owns the four
+built-in services and the root fiber (uid 0).</p></template>
+<template id="t2-extend"><p>Prototypal inheritance with own-keys. Every plugin fiber already runs in
+one of these — its <code>ctx.fiber</code> is set this way.</p></template>
+<template id="t2-isolate"><p><code>ctx.isolate('compaction', Symbol())</code> creates a child whose
+<code>ctx.compaction</code> resolves under a fresh realm symbol. A provider mounted inside writes
+that symbol — visible below the child, invisible beside it. This is the whole trick behind
+per-agent presets.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

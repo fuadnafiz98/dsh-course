@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 · The shape of dsh — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 1 · the shape of dsh</span>
+  <span class="spacer"></span>
+  <a href="../reference/glossary.html">glossary</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0001 · foundations · ~15 min</p>
+<h1>The shape of dsh</h1>
+
+<p class="lede">Before we open a single source file, you need the one idea that makes this entire
+codebase legible: <b>there is no "main program" to find.</b> The harness is a tree of plugins
+assembled from YAML, and every feature — the model adapter, the tool registry, the session log,
+the agent loop itself — is just a row in that tree.</p>
+
+<h2>What a "harness" even is</h2>
+<p>A language model is a function that takes messages and returns a stream of text. By itself it
+can't do anything — it can't run commands, read files, or remember yesterday's conversation.
+An <span class="term">agent harness</span> is all the machinery around the model that turns
+"I predict the next token" into "I am a coding agent":</p>
+<ul>
+  <li>a <b>loop</b> that sends messages to the model and feeds tool results back,</li>
+  <li><b>tools</b> the model can call (bash, file reads, web search…),</li>
+  <li>a <b>session log</b> that records everything so a crash never loses the conversation,</li>
+  <li><b>safety rails</b> — sandboxes, approval prompts, timeouts,</li>
+  <li>and <b>surfaces</b> — a web UI, a headless CLI, an SDK — for humans and other programs.</li>
+</ul>
+<p>Most harnesses hardcode this pipeline. DeepSeek Harness makes a radical choice instead:
+<b>every one of those pieces is a plugin</b>, loaded from configuration, replaceable from
+configuration, removable from configuration.</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 720 240">
+  <g class="dg-node n-store" transform="translate(20,90)" data-dg-title="The model" data-dg-body="#t1-model">
+    <rect width="130" height="54" rx="10"/><text x="65" y="24" text-anchor="middle">LLM</text><text x="65" y="40" text-anchor="middle" class="sub">deepseek-flash</text>
+  </g>
+  <path class="dg-edge" d="M150 117 L190 117" marker-end="url(#arr1)"/>
+  <path class="dg-edge" d="M190 117 L150 117" transform="translate(0,0)"/>
+  <g class="dg-node n-core" transform="translate(195,90)" data-dg-title="The agent loop" data-dg-body="#t1-loop" data-dg-src="packages/core/agent-loop/src/agent.ts:98-138|ReactLoopAgent">
+    <rect width="130" height="54" rx="10"/><text x="65" y="24" text-anchor="middle">agent loop</text><text x="65" y="40" text-anchor="middle" class="sub">dsh-agent-loop</text>
+  </g>
+  <path class="dg-edge" d="M325 117 L365 117"/>
+  <g class="dg-node n-tool" transform="translate(370,40)" data-dg-title="Tools" data-dg-body="#t1-tools" data-dg-src="packages/core/tools/src/index.ts:807|ToolRuntime service">
+    <rect width="140" height="40" rx="10"/><text x="70" y="24" text-anchor="middle">tools (bash, fs, web…)</text>
+  </g>
+  <g class="dg-node n-event" transform="translate(370,140)" data-dg-title="The session log" data-dg-body="#t1-log" data-dg-src="packages/core/session/src/index.ts:446|class Session">
+    <rect width="140" height="40" rx="10"/><text x="70" y="24" text-anchor="middle">session log</text>
+  </g>
+  <path class="dg-edge dash" d="M440 80 L440 138"/>
+  <path class="dg-edge" d="M510 60 L560 60"/>
+  <path class="dg-edge" d="M510 160 L560 160"/>
+  <g class="dg-node n-surface" transform="translate(565,35)" data-dg-title="Surfaces" data-dg-body="#t1-surfaces" data-dg-src="packages/bundle|packages/bundle/">
+    <rect width="140" height="46" rx="10"/><text x="70" y="20" text-anchor="middle">web · headless · sdk</text><text x="70" y="35" text-anchor="middle" class="sub">profiles</text>
+  </g>
+  <g class="dg-node n-store" transform="translate(565,140)" data-dg-title="Persistence" data-dg-body="#t1-persist" data-dg-src="packages/session|packages/session/">
+    <rect width="140" height="46" rx="10"/><text x="70" y="20" text-anchor="middle">disk (JSONL)</text><text x="70" y="35" text-anchor="middle" class="sub">$DSH_HOME/sessions</text>
+  </g>
+  <defs><marker id="arr1" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+  <text class="dg-label" x="360" y="222" text-anchor="middle">a generic harness: loop ↔ model ↔ tools, with a log and a UI</text>
+</svg>
+<figcaption>The generic harness shape. In dsh, literally every box in this drawing is a plugin
+row you could replace with a YAML edit.</figcaption>
+</figure>
+
+<h2>Everything is a plugin — literally</h2>
+<p>Open <a class="code" data-src="packages/bundle/base/cordis.patch.yml">packages/bundle/base/cordis.patch.yml</a>.
+That file is the closest thing this repo has to a "main". It is a list of rows like:</p>
+
+<pre><code>- id: tools
+  name: '@deepseek-ai/dsh-tools'
+
+- id: tool-bash
+  name: '@deepseek-ai/dsh-tool-bash'
+  disabled: !!js process.platform === 'win32'</code></pre>
+
+<p>Each row says: <i>mount the package named <code>name</code>, with this config, unless disabled.</i>
+The session store, the LLM adapter registry, the bash tool, the subagent system, telemetry —
+all just rows. There is no privileged core to patch because <b>the core is rows too</b>.</p>
+
+<div class="callout key">
+  <span class="tag">Mental model</span>
+  <p>Think of the running harness as a <b>Christmas tree</b>, not a car engine. A car engine is
+  machined as one block; if a part fails you can't swap it mid-flight. A Christmas tree is a
+  trunk plus ornaments — every ornament hangs on a hook (a <code>ctx.*</code> service or an event),
+  and you can replace any ornament without touching the others. Cordis is the trunk and the hooks.</p>
+</div>
+
+<h2>The five layers you'll always be in</h2>
+<p>Every file in the repo belongs to exactly one of these layers. When you're lost, first ask
+"which layer is this file in?" — the answer tells you what the file is allowed to do.</p>
+
+<table class="cat">
+  <tr><th style="width:130px">Layer</th><th>Job</th><th>Where</th></tr>
+  <tr><td><b>Cordis</b></td><td>Plugin runtime: contexts, fibers, events, YAML loader</td><td><a class="code" data-src="vendor/cordis/src/">vendor/cordis/</a> + siblings</td></tr>
+  <tr><td><b>Capability seams</b></td><td>Swappable abilities: shell, fs, subagents, sandbox… each a definition + provider + consumer</td><td><code>packages/&lt;group&gt;/</code></td></tr>
+  <tr><td><b>Core spine</b></td><td>The product API: sessions, the loop, tools, the prompt, the LLM seam</td><td><a class="code" data-src="packages/core/">packages/core/</a> + <a class="code" data-src="packages/llm/">packages/llm/</a></td></tr>
+  <tr><td><b>Composition</b></td><td>Deciding which rows exist: bundles, profiles, patches</td><td><a class="code" data-src="packages/bundle/">packages/bundle/</a></td></tr>
+  <tr><td><b>Surfaces</b></td><td>How the app is launched and seen: web, headless, SDK, ACP, desktop</td><td><a class="code" data-src="apps/">apps/</a>, <a class="code" data-src="packages/host/">packages/host/</a>, <a class="code" data-src="packages/client/">packages/client/</a></td></tr>
+</table>
+
+<h2>Reading the repository</h2>
+<p>The repo is a pnpm monorepo. The directories you'll actually live in:</p>
+
+<table class="cat">
+  <tr><th>Path</th><th>What's inside</th></tr>
+  <tr><td><code>vendor/</code></td><td>Source-vendored Cordis + its foundation libraries (cosmokit, schemastery, loader, include, hmr…). The framework, owned and auditable in-repo.</td></tr>
+  <tr><td><code>packages/&lt;group&gt;/&lt;pkg&gt;/</code></td><td>~200 packages of the form <code>@deepseek-ai/dsh-&lt;name&gt;</code>, grouped by capability family. The product.</td></tr>
+  <tr><td><code>apps/</code></td><td>Launched applications: <code>cli</code> (the <code>dsh</code> bin), <code>web</code> (the browser frontend), <code>desktop</code>.</td></tr>
+  <tr><td><code>docs/</code></td><td>The documentation system — architecture map, subsystem references, cookbooks, postmortems, decision notes.</td></tr>
+  <tr><td><code>snapshots/</code></td><td>Keyless recorded-session tests: canned model streams replayed through the real shipped profiles.</td></tr>
+  <tr><td><code>.agents/</code></td><td>Agent-facing workflows and the <b>notes</b> archive — the decision records explaining <i>why</i> the code looks this way.</td></tr>
+</table>
+
+<details class="deeper"><summary>Go deeper: why vendored Cordis?</summary>
+<div class="deeper-body">
+<p>Cordis is copied into <code>vendor/</code> rather than depended on from npm, so the harness
+<b>owns its framework layer</b>: auditable, patchable, pinned. The manifest of what's vendored,
+from which upstream commit, is in <a class="code" data-src="vendor/README.md">vendor/README.md</a> —
+and its "Local modifications" list (22 entries at this commit) is a fascinating read: it tells
+you exactly where the harness hardened upstream Cordis (reentrant disposal, lazy config
+resolution, volatile config, Node loader internals…). When you read <code>vendor/cordis/src</code>,
+you're reading upstream Cordis plus those patches.</p>
+</div></details>
+
+<details class="deeper"><summary>Go deeper: "spatiotemporal composability"</summary>
+<div class="deeper-body">
+<p>The README cites a paper — <a href="https://arxiv.org/abs/2608.25512" target="_blank" rel="noopener"><i>A Programming Paradigm for Spatiotemporal Composability</i></a> —
+which is Cordis's theory: plugins compose in <i>space</i> (contexts and scoped realms) and
+<i>time</i> (fibers that load, unload, and hot-reload without dropping the world). You don't
+need the paper to use the codebase, but it's the reason effects and scopes exist.</p>
+</div></details>
+
+<h2>Your first five-minute task</h2>
+<p>Prove the "everything is a row" claim to yourself:</p>
+<ol>
+  <li>Open <a class="code" data-src="packages/bundle/base/cordis.patch.yml" data-lines="34-41">the llm row in dsh-base</a> — one line mounts the model-adapter registry.</li>
+  <li>Open <a class="code" data-src="packages/bundle/base/cordis.patch.yml" data-lines="267-269">the tool-bash row</a> — the model-facing bash tool is a row you could disable.</li>
+  <li>Open <a class="code" data-src="packages/bundle/headless/cordis.patch.yml">the headless patch</a> — see how a whole different product (one-shot CLI) is just ~5 extra rows on the same base.</li>
+</ol>
+<p>If a feature isn't in a patch or a plugin's source, it doesn't exist at runtime. That
+invariant is your compass for the rest of the course.</p>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> A new coworker asks where "the main function" of dsh lives. What's the honest answer?</p>
+  <div class="opts">
+    <button>apps/cli/src/bin.ts — it owns the whole pipeline</button>
+    <button data-ok>There's no main pipeline — bin.ts boots a Loader that mounts whatever the profile's patch layers list</button>
+    <button>packages/core/agent-loop — the loop is the program</button>
+  </div>
+  <p class="why"><b>Exactly.</b> <code>bin.ts</code> is only the launcher: it parses argv, resolves the
+  profile, and hands a composed YAML tree to the Cordis Loader. The "program" is the set of rows
+  that tree ends up mounting — swap the rows, and a different product runs. Even the agent loop is
+  just the <code>dsh-agent-loop</code> plugin.</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> Which layer decides <i>which plugins exist</i> in a running app?</p>
+  <div class="opts">
+    <button>The core spine (packages/core)</button>
+    <button>The capability seams (ctx.* services)</button>
+    <button data-ok>The composition layer — profiles stacking bundle patches</button>
+  </div>
+  <p class="why">The composition layer owns membership. <code>dsh-base</code> inserts ~80 rows;
+  a profile like <code>web</code> layers more bundles and patches on top; a user's
+  <code>cordis.patch.yml</code> and <code>--patch</code> overlays get the last word.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Skim <a class="code" data-src="docs/architecture.md">docs/architecture.md</a> next — it is the
+project's own ordered map, and this course follows its outline. And as always: <b>ask me
+anything that's unclear</b> — that's what I'm here for.</p>
+
+<button class="mark-done" data-lesson="1"></button>
+
+<nav class="lesson-nav">
+  <a href="../index.html" rel="prev">← course home</a>
+  <a href="0002-cordis-context.html" rel="next">lesson 2: Context, the shared world →</a>
+</nav>
+
+</main>
+
+<template id="t1-model"><p>Any LLM behind an adapter. The shipped default is DeepSeek's own API
+(<code>deepseek-official</code> / <code>deepseek-flash</code>), but the loop only ever sees the
+provider-neutral <code>ctx.llm</code> seam — lesson 10.</p></template>
+<template id="t1-loop"><p>One <code>ReactLoopAgent</code> per session: claims queued input, builds
+each request from the session log, streams the model, runs tool calls, appends events. It's a
+plugin (<code>dsh-agent-loop</code>) — you could mount a different driver.</p></template>
+<template id="t1-tools"><p>Every model-facing tool (bash, fs, web, subagent, todo…) is a plugin that
+registers a <code>ToolDefinition</code> on <code>ctx.tools</code>. The pipeline wraps each call in
+policy waterfalls — lesson 9.</p></template>
+<template id="t1-log"><p>The append-only <code>SessionEvent</code> log is the source of truth: the
+model's context is <i>derived</i> from it, persistence replays it, the UI renders it. Lesson 7.</p></template>
+<template id="t1-surfaces"><p>A "surface" is a profile = a stack of bundle patches.
+<code>web</code>, <code>headless</code>, <code>sdk</code>, <code>acp</code> ship as templates —
+same engine, different outermost rows. Lesson 5.</p></template>
+<template id="t1-persist"><p><code>ctx.sessionPersistence</code> is a seam; the shipped backend writes
+<code>session.vN.jsonl[.zstd]</code> under <code>$DSH_HOME/sessions/</code>, one generation file per
+format version.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

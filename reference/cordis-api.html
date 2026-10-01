@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cordis cheat sheet — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<nav class="crumb"><a href="../index.html">dsh course</a><span class="crumb-sep">›</span><span class="here">reference · cordis cheat sheet</span></nav>
+<main>
+<h1>Cordis cheat sheet</h1>
+<p class="lede">The whole vendored framework distilled to its API surface. When you know these ~20
+operations, you can read any plugin in the repo. Each links to the implementing source.</p>
+
+<h2>Context — <a class="code" data-src="vendor/cordis/src/context.ts">vendor/cordis/src/context.ts</a></h2>
+<table class="cat">
+<tr><th>API</th><th>What it does</th></tr>
+<tr><td><code>new Context()</code></td><td>Create a root world; wires reflect/registry/events/logger and returns the proxy.</td></tr>
+<tr><td><code>ctx.extend(meta?)</code></td><td>Child context: prototypal inheritance plus own keys (e.g. a fiber's ctx.fiber).</td></tr>
+<tr><td><code>ctx.isolate(name, key?)</code></td><td>Child where service <code>name</code> resolves in a fresh realm — same name, different impl.</td></tr>
+<tr><td><code>ctx.intercept(name, config)</code></td><td>Merge config into every plugin under the child that uses service <code>name</code>.</td></tr>
+<tr><td><code>ctx.mixin(name, entries)</code></td><td>Provide derived properties on the context.</td></tr>
+<tr><td><code>ctx.&lt;name&gt;</code></td><td>Proxy read → resolve the service (throws if absent unless injected).</td></tr>
+<tr><td><code>ctx.get(name)</code></td><td>Strict read of the global store; <code>undefined</code> if absent — for optional deps.</td></tr>
+<tr><td><code>ctx.provide(name, impl)</code></td><td>Register an impl under a name — an owned effect (undone on unload).</td></tr>
+<tr><td><code>ctx.fiber</code></td><td>The current fiber (set on the plugin's child context).</td></tr>
+</table>
+
+<h2>Plugins &amp; fibers — <a class="code" data-src="vendor/cordis/src/fiber.ts">fiber.ts</a> · <a class="code" data-src="vendor/cordis/src/registry.ts">registry.ts</a></h2>
+<table class="cat">
+<tr><th>API / field</th><th>What it does</th></tr>
+<tr><td><code>ctx.plugin(plugin, config?)</code></td><td>Mount a plugin → create a fiber. Accepts fn / {apply} / class.</td></tr>
+<tr><td><code>ctx.inject(deps, cb)</code></td><td>Run cb in a child ctx once all deps exist; re-runs if a dep is replaced.</td></tr>
+<tr><td><code>static inject / inject</code></td><td>Plugin's declared deps: <code>['a']</code> or <code>{required:[], optional:[]}</code>.</td></tr>
+<tr><td><code>ctx.effect(fn)</code></td><td>Run fn now; record its disposer on the fiber; runs in reverse on unload.</td></tr>
+<tr><td><code>ctx.fork(config?)</code></td><td>Mount a sub-plugin under the current fiber.</td></tr>
+<tr><td><code>fiber.state</code></td><td>PENDING → LOADING → ACTIVE | FAILED | UNLOADING → DISPOSED.</td></tr>
+<tr><td><code>fiber.dispose()</code></td><td>Unmount the plugin: unwind effects in reverse, unprovide services.</td></tr>
+<tr><td><code>Fiber.update()</code></td><td>Re-evaluate deps/config — wait more, reuse, or restart the fiber.</td></tr>
+</table>
+
+<h2>Services — <a class="code" data-src="vendor/cordis/src/service.ts">service.ts</a></h2>
+<table class="cat">
+<tr><th>API</th><th>What it does</th></tr>
+<tr><td><code>class X extends Service</code></td><td><code>super(ctx, 'x')</code> registers the instance as <code>ctx.x</code> (auto-removed on unload).</td></tr>
+<tr><td><code>Service.check</code></td><td>A service can gate whether a candidate may provide under its name.</td></tr>
+</table>
+
+<h2>Events — <a class="code" data-src="vendor/cordis/src/events.ts">events.ts</a></h2>
+<table class="cat">
+<tr><th>API</th><th>Dispatch</th></tr>
+<tr><td><code>ctx.on(name, fn, opts?)</code></td><td>Register a listener (owned by the fiber). <code>opts: {prepend, global}</code>.</td></tr>
+<tr><td><code>ctx.emit(name, ...args)</code></td><td>Fire all listeners, sync, not awaited — observability.</td></tr>
+<tr><td><code>ctx.parallel(name, ...args)</code></td><td>All listeners concurrently, await all.</td></tr>
+<tr><td><code>ctx.serial(name, ...args)</code></td><td>All listeners in order, awaited; truthy bails early.</td></tr>
+<tr><td><code>ctx.bail(name, ...args)</code></td><td>Sync; first truthy return wins.</td></tr>
+<tr><td><code>ctx.waterfall(name, payload, next)</code></td><td>Middleware chain — each listener gets (payload, next); must call next() to delegate.</td></tr>
+<tr><td><code>ctx.on(name, key, fn)</code></td><td>Scoped subscription — only events dispatched under that scope key.</td></tr>
+</table>
+
+<h2>Loader &amp; Include — <a class="code" data-src="vendor/loader/src/">vendor/loader</a> · <a class="code" data-src="vendor/include/src/">vendor/include</a></h2>
+<table class="cat">
+<tr><th>Piece</th><th>Role</th></tr>
+<tr><td><code>Loader</code></td><td>Plugin that owns the entry tree — resolves specifiers, spawns fibers.</td></tr>
+<tr><td><code>ctx.loader</code></td><td>The mounted Loader service; <code>ctx.loader.entries()</code>, <code>.await()</code>, <code>.create()</code>.</td></tr>
+<tr><td><code>Include</code> + <code>cordis:include</code></td><td>Parses a cordis.yml and applies patch lists; mounted as a builtin.</td></tr>
+<tr><td><code>applyEntryPatches</code></td><td>The pure patch algorithm (insert + id-targeted replace, last wins).</td></tr>
+<tr><td><code>entry.update()</code></td><td>Reapply an entry's config — drives fiber update/restart.</td></tr>
+</table>
+
+<h2>The invariants to memorize</h2>
+<ul>
+  <li><b>Inject declares, fiber waits.</b> Row order is meaningless; dependencies sequence mounting.</li>
+  <li><b>Every registration is an effect.</b> Listeners, provides, child plugins — all undone on unload, in reverse.</li>
+  <li><b>Waterfall = next() or deny.</b> Returning without <code>next()</code> short-circuits — that's the policy lever.</li>
+  <li><b>Contexts are a tree.</b> extend/isolate/intercept create scoped worlds; services resolve per-realm.</li>
+</ul>
+</main>
+<script src="../assets/course.js"></script>
+</body>
+</html>

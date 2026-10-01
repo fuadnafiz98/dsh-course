@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10 · The LLM seam — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 10 · the LLM seam</span>
+  <span class="spacer"></span>
+  <a href="../reference/event-catalog.html">event catalog</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0010 · core · ~15 min</p>
+<h1>The LLM seam</h1>
+
+<p class="lede">The agent loop never imports a provider SDK. It calls <code>ctx.llm.stream(request)</code>
+or <code>ctx.llm.prepareCall(config)</code> and doesn't know — or care — whether the bytes come from
+DeepSeek, OpenAI, a local model, or a test fake. That indirection is the <b>LLM seam</b>, and it's
+the reason the same harness serves any model.</p>
+
+<h2>The shape of the seam</h2>
+<p><code>LlmRuntime</code> (<a class="code" data-src="packages/llm/llm/src/index.ts" data-lines="342-">packages/llm/llm/src/index.ts:342</a>)
+is just a service named <code>llm</code> holding a registry: <b>provider route → adapter</b>.
+An adapter is a plugin that knows one provider's wire format; it registers itself at mount and
+unregisters when its fiber unloads.</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 760 320">
+  <defs><marker id="ah10" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+  <g class="dg-node n-core" transform="translate(40,60)" data-dg-title="the loop" data-dg-body="#t10-loop"><rect width="140" height="46" rx="9"/><text x="70" y="28" text-anchor="middle">ReactLoopAgent</text></g>
+  <path class="dg-edge" d="M180 83 L226 83" marker-end="url(#ah10)"/>
+  <text class="dg-label" x="203" y="74" text-anchor="middle">ctx.llm</text>
+  <g class="dg-node n-cordis" transform="translate(230,50)" data-dg-title="LlmRuntime" data-dg-body="#t10-runtime" data-dg-src="packages/llm/llm/src/index.ts:342|LlmRuntime">
+    <rect width="200" height="66" rx="9"/><text x="100" y="24" text-anchor="middle">LlmRuntime</text><text x="100" y="42" text-anchor="middle" class="sub">provider → adapter registry</text><text x="100" y="57" text-anchor="middle" class="sub">prepareCall · stream · discover</text>
+  </g>
+  <path class="dg-edge" d="M430 70 L470 40" marker-end="url(#ah10)"/>
+  <path class="dg-edge" d="M430 96 L470 120" marker-end="url(#ah10)"/>
+  <path class="dg-edge" d="M430 110 L470 200" marker-end="url(#ah10)"/>
+  <g class="dg-node n-tool" transform="translate(474,16)" data-dg-title="deepseek adapter" data-dg-body="#t10-ds"><rect width="200" height="46" rx="9"/><text x="100" y="20" text-anchor="middle">deepseek adapter</text><text x="100" y="36" text-anchor="middle" class="sub">deepseek-official · deepseek-flash</text></g>
+  <g class="dg-node n-tool" transform="translate(474,96)" data-dg-title="openai-style adapter" data-dg-body="#t10-oa"><rect width="200" height="46" rx="9"/><text x="100" y="20" text-anchor="middle">openai-compat adapter</text><text x="100" y="36" text-anchor="middle" class="sub">openai · anthropic · ollama …</text></g>
+  <g class="dg-node n-event" transform="translate(474,176)" data-dg-title="a test fake" data-dg-body="#t10-fake"><rect width="200" height="46" rx="9"/><text x="100" y="20" text-anchor="middle">snapshot adapter</text><text x="100" y="36" text-anchor="middle" class="sub">canned streams — no key needed</text></g>
+  <text class="dg-label" x="380" y="270" text-anchor="middle">one interface — the loop is provider-agnostic; the registry is the whole seam</text>
+</svg>
+<figcaption>The registry is the seam: adapters register routes, the loop looks them up by
+<code>{provider, model}</code>. Swap the adapter plugin and you swap the model — the loop is
+unchanged.</figcaption>
+</figure>
+
+<h2>Two calls the loop makes</h2>
+<p>From lesson 8's <code>prepareRequest</code>:</p>
+<ul>
+  <li><b><code>ctx.llm.prepareCall(config, signal)</code></b> — resolves the adapter for the route,
+  validates config, and returns a <code>PreparedLlmCall</code> carrying the adapter's
+  <code>stream()</code>, its retry policy, context-window metadata, and the effective config
+  (adapter defaults folded in). Binding <i>once per step</i> means the adapter's capabilities are
+  known before the request is built.</li>
+  <li><b><code>preparedCall.stream(request)</code></b> (or the raw <code>ctx.llm.stream</code>
+  fallback) — returns the async iterable of stream frames the loop settles into a durable event.</li>
+</ul>
+
+<h2>What an adapter actually does</h2>
+<p>An adapter translates between the harness's canonical message vocabulary and a provider's wire
+protocol:</p>
+<ul>
+  <li><b>In</b>: take <code>{provider, model, messages, tools, …}</code> and render the provider's
+  request body.</li>
+  <li><b>Out</b>: yield canonical stream frames (text deltas, reasoning deltas, tool-call deltas,
+  usage, finish reason) regardless of the wire dialect.</li>
+  <li><b>Metadata</b>: <code>providerInfo</code> (id/name), <code>providerRetryPolicy</code>,
+  context-window size, system-prompt-update mode.</li>
+</ul>
+<p>Registration is an <b>effect</b>
+(<a class="code" data-src="packages/llm/llm/src/index.ts" data-lines="396-425">registerAdapter</a>):
+it's a <code>ctx.effect</code> whose disposer removes the routes — so unloading an adapter plugin
+unregisters it, and <code>llm/adapters-updated</code> fires for observers.</p>
+
+<div class="callout key">
+  <span class="tag">Why this matters</span>
+  <p>The LLM seam is the <b>Definition/Provider/Consumer</b> pattern you'll see everywhere in lesson
+  12. <code>dsh-llm</code> is the <i>definition</i> (the <code>ctx.llm</code> service + adapter
+  contract). Each provider package is a <i>provider</i>. The agent loop is the <i>consumer</i>.
+  Because they only meet through the service, a new provider is a new plugin, not a change to the
+  loop.</p>
+</div>
+
+<h2>The stream is interceptable too</h2>
+<p><code>llm/stream</code> is a <b>waterfall</b> — the same middleware mechanism as
+<code>agent/request</code>. A plugin can wrap the live stream to add telemetry, redact secrets
+from deltas, or enforce a policy — around the actual model call, not beside it.</p>
+
+<h2>Retries are owned by the adapter's policy</h2>
+<p>When a stream finishes with an error, the loop consults
+<a class="code" data-src="packages/core/agent-loop/src/agent.ts" data-lines="494-509">the
+<code>agent/request-error</code> waterfall</a> carrying the adapter's
+<code>retryPolicy</code> — an <code>{kind:'retry'}</code> decision re-enters request preparation
+without re-admitting the step. The retry decision belongs to the provider's declared policy, not a
+hardcoded loop behavior — one more place the seam keeps provider knowledge out of the core.</p>
+
+<details class="deeper"><summary>Go deeper: the registry is atomic + observable</summary>
+<div class="deeper-body">
+<p><code>registerAdapter</code> is all-or-nothing (a duplicate provider route throws
+<code>DUPLICATE_ADAPTER</code>), validates adapter metadata, and — unusually — fires
+<code>llm/adapters-updated</code> with each listener contained so one broken observer can't veto a
+commit or starve the others. The <code>replace()</code> handle re-routes in one synchronous section,
+so no observer ever sees a half-swapped registry. This is a model for writing your own registries.</p>
+</div></details>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> How does the loop reach DeepSeek's API?</p>
+  <div class="opts">
+    <button>It imports @deepseek-ai/dsh-deepseek directly</button>
+    <button data-ok>It calls ctx.llm.prepareCall / stream — whichever adapter registered the route serves it</button>
+    <button>Through a hardcoded fetch in agent.ts</button>
+  </div>
+  <p class="why">The loop only knows the <code>ctx.llm</code> seam. A DeepSeek adapter plugin
+  registered the <code>deepseek-official</code>/<code>deepseek-flash</code> routes at mount; the
+  loop resolves them by name.</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> What happens to a provider's routes when its adapter plugin unloads?</p>
+  <div class="opts">
+    <button>They stay registered until restart</button>
+    <button data-ok>They're removed — registration is an effect owned by the fiber</button>
+    <button>They're marked stale but kept</button>
+  </div>
+  <p class="why">Registration is a <code>ctx.effect</code>: the disposer deletes the routes and fires
+  <code>llm/adapters-updated</code>. Unloading the fiber un-registers the provider automatically.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Read <a class="code" data-src="packages/llm/llm/src/index.ts" data-lines="342-470">LlmRuntime</a>
+(<code>registerAdapter</code> → <code>prepareRoutes</code> → <code>commitRoutes</code> →
+<code>prepareCall</code>), then the canonical types in
+<a class="code" data-src="packages/llm/llm/src/types.ts">types.ts</a> — that's the message vocabulary
+every adapter speaks.</p>
+
+<button class="mark-done" data-lesson="10"></button>
+
+<nav class="lesson-nav">
+  <a href="0009-tools-pipeline.html" rel="prev">← lesson 9: the tool pipeline</a>
+  <a href="0011-scopes-presets.html" rel="next">lesson 11: scopes, realms &amp; presets →</a>
+</nav>
+
+</main>
+
+<template id="t10-loop"><p>The consumer: it asks the seam for a prepared call, then iterates the
+stream. It never touches a provider SDK.</p></template>
+<template id="t10-runtime"><p>The definition/registry: holds <code>provider → adapter</code>, plus
+model discovery and provider metadata. <code>prepareCall</code> binds an adapter for a route.</p></template>
+<template id="t10-ds"><p>First-party DeepSeek adapter — the shipped default. Registers
+<code>deepseek-official</code>, <code>deepseek-flash</code>, etc.</p></template>
+<template id="t10-oa"><p>Provider packages for OpenAI-compatible endpoints (and others) — each a
+plugin registering its routes on <code>ctx.llm</code>.</p></template>
+<template id="t10-fake"><p>The snapshot-testing adapter replays canned streams — the keyless test
+path. It's a provider like any other, which is exactly why tests can be real.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

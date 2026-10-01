@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source map — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">reference · interactive source map</span>
+</nav>
+
+<main class="wide">
+
+<h1>Interactive source map</h1>
+<p class="lede">"Where does X live?" — one searchable catalog of every layer, package group, and
+key file, each linking to the real source at the pinned commit. Type to filter; click a code chip
+to open the file on GitHub.</p>
+
+<input class="filterbox" data-target="[data-filt]" type="search" placeholder="filter: try 'tools', 'session', 'subagent', 'event', 'provider'…" aria-label="Filter the source map">
+
+<h2>The five layers</h2>
+<table class="cat">
+  <tr><th>Layer</th><th>Rule</th><th>Root</th></tr>
+  <tr data-filt="cordis vendor framework runtime context fiber service events loader include"><td><b>Cordis</b></td><td>Plugin runtime — vendored, audited</td><td><a class="code" data-src="vendor/cordis/src/">vendor/cordis/</a></td></tr>
+  <tr data-filt="composition profile bundle patch cordis.yml yaml boot"><td><b>Composition</b></td><td>Which plugins exist, in what config</td><td><a class="code" data-src="packages/bundle/">packages/bundle/</a> · <a class="code" data-src="apps/cli">apps/cli</a></td></tr>
+  <tr data-filt="core spine session agent loop tools prompt llm"><td><b>Core spine</b></td><td>The product API: sessions/loop/tools/llm</td><td><a class="code" data-src="packages/core/">packages/core/</a> · <a class="code" data-src="packages/llm/">packages/llm/</a></td></tr>
+  <tr data-filt="capability seams shell fs subagent sandbox jobs web terminal lsp mcp"><td><b>Capability seams</b></td><td>Definition/Provider/Consumer triples</td><td><a class="code" data-src="packages/">packages/&lt;group&gt;/</a></td></tr>
+  <tr><td><b>Surfaces</b></td><td>web / headless / sdk / acp / desktop</td><td><a class="code" data-src="apps/">apps/</a> · <a class="code" data-src="packages/host/">host</a> · <a class="code" data-src="packages/client/">client</a></td></tr>
+</table>
+
+<h2>Cordis (the framework)</h2>
+<table class="cat">
+  <tr><th>File</th><th>What it owns</th></tr>
+  <tr data-filt="context ctx proxy provide get extend isolate intercept"><td><a class="code" data-src="vendor/cordis/src/context.ts">context.ts</a></td><td>Context — the proxied service world; extend/isolate/intercept</td></tr>
+  <tr data-filt="fiber lifecycle plugin pending active dispose effect"><td><a class="code" data-src="vendor/cordis/src/fiber.ts">fiber.ts</a></td><td>Fiber — one plugin's lifecycle, deps, effect stack</td></tr>
+  <tr data-filt="registry plugin inject import entry"><td><a class="code" data-src="vendor/cordis/src/registry.ts">registry.ts</a></td><td>Registry — ctx.plugin(), inject resolution, fiber creation</td></tr>
+  <tr data-filt="events emit parallel serial bail waterfall dispatch"><td><a class="code" data-src="vendor/cordis/src/events.ts">events.ts</a></td><td>EventsService — the 5 dispatch modes + listener lifecycle</td></tr>
+  <tr data-filt="service base class provide name"><td><a class="code" data-src="vendor/cordis/src/service.ts">service.ts</a></td><td>Service — the ctx.&lt;name&gt; base class</td></tr>
+  <tr data-filt="reflect store service lookup realm"><td><a class="code" data-src="vendor/cordis/src/reflect.ts">reflect.ts</a></td><td>ReflectService — the realm-keyed service store + proxy traps</td></tr>
+  <tr data-filt="loader entries modules yaml mount"><td><a class="code" data-src="vendor/loader/src/">vendor/loader/</a></td><td>Loader — turns entry rows into fibers, owns the tree</td></tr>
+  <tr data-filt="include cordis.yml patch insert applyEntryPatches"><td><a class="code" data-src="vendor/include/src/">vendor/include/</a></td><td>Include — parses cordis.yml, applies patch lists</td></tr>
+  <tr data-filt="hmr hot reload watch"><td><a class="code" data-src="vendor/hmr/">vendor/hmr/</a></td><td>HMR — hot-reload via fiber dispose/recreate</td></tr>
+</table>
+
+<h2>Core spine</h2>
+<table class="cat">
+  <tr><th>Service</th><th>Definition</th><th>Owns</th></tr>
+  <tr data-filt="agents agent registry create factory"><td><code>ctx.agents</code></td><td><a class="code" data-src="packages/core/agent/src/index.ts">core/agent</a></td><td>Agent registry, creation seam, initiator scope, agent/* dispatch</td></tr>
+  <tr data-filt="agentloop loop turn step react"><td><code>ctx.agentLoop</code></td><td><a class="code" data-src="packages/core/agent-loop/src/agent.ts">core/agent-loop</a></td><td>ReactLoopAgent — the turn/step driver</td></tr>
+  <tr data-filt="sessions session store log events"><td><code>ctx.sessions</code></td><td><a class="code" data-src="packages/core/session/src/index.ts">core/session</a></td><td>SessionStore — live sessions, the append-only event log</td></tr>
+  <tr data-filt="systemprompt prompt sections assemble"><td><code>ctx.systemPrompt</code></td><td><a class="code" data-src="packages/core/system-prompt/src/index.ts">core/system-prompt</a></td><td>Prompt assembly — sections + tool schemas</td></tr>
+  <tr data-filt="tools registry execution pre-execute"><td><code>ctx.tools</code></td><td><a class="code" data-src="packages/core/tools/src/index.ts">core/tools</a></td><td>ToolRuntime — tool registry + pre/execute/post pipeline</td></tr>
+  <tr data-filt="llm adapter provider model stream"><td><code>ctx.llm</code></td><td><a class="code" data-src="packages/llm/llm/src/index.ts">llm/llm</a></td><td>LlmRuntime — provider adapter registry + streaming seam</td></tr>
+  <tr data-filt="scope realms scoped per-agent"><td>scope</td><td><a class="code" data-src="packages/core/scope/src/index.ts">core/scope</a></td><td>createScope/scopeTarget/ScopedLayers — per-agent worlds</td></tr>
+</table>
+
+<h2>Capability seams (packages/&lt;group&gt;)</h2>
+<table class="cat">
+  <tr><th>Group</th><th>Provides</th><th>Root</th></tr>
+  <tr data-filt="shell bash subprocess command exec"><td>shell / subprocess</td><td><code>ctx.shell</code>, process tree</td><td><a class="code" data-src="packages/shell/">shell</a> · <a class="code" data-src="packages/subprocess/">subprocess</a></td></tr>
+  <tr data-filt="fs filesystem file read write"><td>fs</td><td><code>ctx.fs</code> — local/sandbox/ssh</td><td><a class="code" data-src="packages/fs/">fs</a></td></tr>
+  <tr data-filt="terminal pty persistent shell session"><td>terminal</td><td><code>ctx.terminal</code> — PTY sessions</td><td><a class="code" data-src="packages/terminal/">terminal</a></td></tr>
+  <tr data-filt="sandbox confinement seatbelt landlock"><td>sandbox</td><td><code>ctx.sandbox</code> — OS confinement</td><td><a class="code" data-src="packages/sandbox/">sandbox</a></td></tr>
+  <tr data-filt="subagent delegation spawn fork"><td>subagent</td><td><code>ctx.subagents</code> — spawn/fork/acp</td><td><a class="code" data-src="packages/subagent/">subagent</a></td></tr>
+  <tr data-filt="jobs background run_in_background"><td>jobs</td><td><code>ctx.jobs</code> — background jobs</td><td><a class="code" data-src="packages/jobs/">jobs</a></td></tr>
+  <tr data-filt="web search fetch"><td>web</td><td><code>ctx.web</code> — search + fetch providers</td><td><a class="code" data-src="packages/web/">web</a></td></tr>
+  <tr data-filt="lsp language server symbols"><td>lsp</td><td><code>ctx.lsp</code> — language servers</td><td><a class="code" data-src="packages/lsp/">lsp</a></td></tr>
+  <tr data-filt="mcp model context protocol external"><td>mcp</td><td><code>ctx.mcp</code> — external MCP servers</td><td><a class="code" data-src="packages/mcp/">mcp</a></td></tr>
+  <tr data-filt="skill loading skill loader"><td>skill</td><td>skill loading into the prompt</td><td><a class="code" data-src="packages/skill/">skill</a></td></tr>
+  <tr data-filt="compaction context window summarize"><td>compaction</td><td>context compaction via surface ops</td><td><a class="code" data-src="packages/compaction/">compaction</a></td></tr>
+  <tr data-filt="preset agent composition"><td>preset</td><td>per-agent composition</td><td><a class="code" data-src="packages/preset/">preset</a></td></tr>
+  <tr data-filt="guard policy approval"><td>guard</td><td>loop/tool guards</td><td><a class="code" data-src="packages/guard/">guard</a></td></tr>
+  <tr data-filt="storage kv persistence"><td>storage / session</td><td><code>ctx.storage</code> · session persistence</td><td><a class="code" data-src="packages/storage/">storage</a> · <a class="code" data-src="packages/session/">session</a></td></tr>
+  <tr data-filt="todo plan goal schedule"><td>todo / plan / goal / schedule</td><td>task + planning tools</td><td><a class="code" data-src="packages/todo/">todo</a> · <a class="code" data-src="packages/plan/">plan</a> · <a class="code" data-src="packages/goal/">goal</a> · <a class="code" data-src="packages/schedule/">schedule</a></td></tr>
+</table>
+
+<h2>Surfaces &amp; boot</h2>
+<table class="cat">
+  <tr><th>Path</th><th>What it is</th></tr>
+  <tr data-filt="cli bin argv dsh"><td><a class="code" data-src="apps/cli">apps/cli</a></td><td>The <code>dsh</code> bin — argv → runProfile → boot</td></tr>
+  <tr data-filt="appboot boot context loader"><td><a class="code" data-src="packages/boot/app-boot">boot/app-boot</a></td><td>boot() — Context → Loader → Include → audit</td></tr>
+  <tr data-filt="web frontend browser ui"><td><a class="code" data-src="apps/web">apps/web</a></td><td>The browser UI frontend</td></tr>
+  <tr data-filt="desktop electron"><td><a class="code" data-src="apps/desktop">apps/desktop</a></td><td>Electron shell</td></tr>
+  <tr data-filt="host server api gateway typert"><td><a class="code" data-src="packages/host/">packages/host</a></td><td>Web host services (server side of the GUI)</td></tr>
+  <tr data-filt="client browser plugins ui"><td><a class="code" data-src="packages/client/">packages/client</a></td><td>Browser-side (dsh-client-*) plugins</td></tr>
+  <tr data-filt="sdk jsonrpc embed"><td><a class="code" data-src="packages/sdk">packages/sdk</a></td><td>JSON-RPC SDK — TS + Python</td></tr>
+  <tr data-filt="acp agent client protocol zed"><td><a class="code" data-src="packages/acp">packages/acp</a></td><td>Agent Client Protocol surface</td></tr>
+  <tr data-filt="bundle patch profile composition"><td><a class="code" data-src="packages/bundle/">packages/bundle</a></td><td>Shipped profile layers (dsh-base, web-app, headless…)</td></tr>
+  <tr data-filt="test snapshot replay"><td><a class="code" data-src="packages/test-support/">packages/test-support</a> · <a class="code" data-src="snapshots/">snapshots/</a></td><td>Recorded-session replay harness</td></tr>
+</table>
+
+<h2>Docs worth reading first</h2>
+<table class="cat">
+  <tr data-filt="architecture"><td><a class="code" data-src="docs/architecture.md">docs/architecture.md</a></td><td>The project's own ordered map — read first</td></tr>
+  <tr data-filt="cordis primer"><td><a class="code" data-src="docs/cordis-primer.md">docs/cordis-primer.md</a></td><td>Cordis concepts incl. waterfall semantics</td></tr>
+  <tr data-filt="agent lifecycle"><td><a class="code" data-src="docs/agent-lifecycle.md">docs/agent-lifecycle.md</a></td><td>The full turn Mermaid sequence diagram</td></tr>
+  <tr data-filt="glossary"><td><a class="code" data-src="docs/glossary.md">docs/glossary.md</a></td><td>Capability seam + repo terminology</td></tr>
+  <tr data-filt="testing"><td><a class="code" data-src="docs/testing.md">docs/testing.md</a></td><td>Snapshot/replay testing policy</td></tr>
+</table>
+
+</main>
+<script src="../assets/course.js"></script>
+</body>
+</html>

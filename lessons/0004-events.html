@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · Events: five dispatch modes — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 4 · events: five dispatch modes</span>
+  <span class="spacer"></span>
+  <a href="../reference/event-catalog.html">event catalog</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0004 · cordis · ~15 min</p>
+<h1>Events: the five dispatch modes</h1>
+
+<p class="lede">Services answer "who can I call?" Events answer "who can I notify — and do I want
+an answer back?" Cordis has <b>five</b> dispatch modes, and learning them is what unlocks the
+agent loop: the harness's entire policy layer is built on waterfalls.</p>
+
+<h2>One bus, five semantics</h2>
+<p>All listeners are registered with the same <code>ctx.on(name, fn)</code> —
+(<a class="code" data-src="vendor/cordis/src/events.ts" data-lines="131-252">EventsService</a>).
+What differs is the <b>dispatch mode</b>, a property of the <i>event name</i> (declared once via
+TypeScript <code>EventMap</code> merging), not of the call site.</p>
+
+<table class="cat">
+  <tr><th>Mode</th><th>Fan-out</th><th>Returns</th><th>Job</th></tr>
+  <tr><td><code>emit</code></td><td>All listeners, fire-and-forget</td><td>nothing</td><td>Observability — telemetry, UI updates</td></tr>
+  <tr><td><code>parallel</code></td><td>All listeners, awaited</td><td>Promise&lt;void&gt;</td><td>"Everyone must finish" — fan-out work</td></tr>
+  <tr><td><code>serial</code></td><td>All listeners, in order, awaited</td><td>Promise&lt;void&gt;</td><td>Ordered pipeline, can bail</td></tr>
+  <tr><td><code>bail</code></td><td>Sync; stops at first truthy return</td><td>first non-falsy result</td><td>Quick veto / winner-take-all</td></tr>
+  <tr><td><code>waterfall</code></td><td>Middleware chain — each calls <code>next()</code></td><td>the chain's result</td><td>Policy, transformation, interception</td></tr>
+</table>
+
+<figure class="diagram">
+<svg viewBox="0 0 740 340">
+  <defs><marker id="ah4" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+  <g class="dg-node n-core" transform="translate(30,30)" data-dg-title="emit — observe" data-dg-body="#t4-emit">
+    <rect width="140" height="36" rx="8"/><text x="70" y="22" text-anchor="middle">emit</text>
+  </g>
+  <g class="dg-node n-core" transform="translate(200,30)" data-dg-title="parallel — await all" data-dg-body="#t4-parallel">
+    <rect width="140" height="36" rx="8"/><text x="70" y="22" text-anchor="middle">parallel</text>
+  </g>
+  <g class="dg-node n-core" transform="translate(370,30)" data-dg-title="serial — in order" data-dg-body="#t4-serial">
+    <rect width="140" height="36" rx="8"/><text x="70" y="22" text-anchor="middle">serial</text>
+  </g>
+  <g class="dg-node n-core" transform="translate(540,30)" data-dg-title="bail — first wins" data-dg-body="#t4-bail">
+    <rect width="140" height="36" rx="8"/><text x="70" y="22" text-anchor="middle">bail</text>
+  </g>
+
+  <text class="dg-label" x="70" y="86" text-anchor="middle">→ all, sync-ish</text>
+  <text class="dg-label" x="270" y="86" text-anchor="middle">→ all, Promise.all</text>
+  <text class="dg-label" x="440" y="86" text-anchor="middle">→ all, sequential</text>
+  <text class="dg-label" x="610" y="86" text-anchor="middle">→ first truthy wins</text>
+
+  <g class="dg-node n-event" transform="translate(30,120)" data-dg-title="waterfall — the middleware spine" data-dg-body="#t4-waterfall" data-dg-src="vendor/cordis/src/events.ts:253-320|waterfall impl">
+    <rect width="200" height="44" rx="8"/><text x="100" y="27" text-anchor="middle">waterfall — chain of next()</text>
+  </g>
+
+  <path class="dg-edge" d="M230 142 L270 142" marker-end="url(#ah4)"/>
+  <g class="dg-node n-tool" transform="translate(276,124)" data-dg-title="listener 1" data-dg-body="#t4-l1"><rect width="84" height="36" rx="8"/><text x="42" y="22" text-anchor="middle">hook 1</text></g>
+  <path class="dg-edge" d="M360 142 L400 142" marker-end="url(#ah4)"/>
+  <g class="dg-node n-tool" transform="translate(406,124)" data-dg-title="listener 2" data-dg-body="#t4-l2"><rect width="84" height="36" rx="8"/><text x="42" y="22" text-anchor="middle">hook 2</text></g>
+  <path class="dg-edge" d="M490 142 L530 142" marker-end="url(#ah4)"/>
+  <g class="dg-node n-core" transform="translate(536,124)" data-dg-title="the innermost callee" data-dg-body="#t4-inner"><rect width="120" height="36" rx="8"/><text x="60" y="22" text-anchor="middle">the callee</text></g>
+
+  <text class="dg-label" x="360" y="186" text-anchor="middle">each hook receives (payload, next) and must call next() — returning without it short-circuits</text>
+  <text class="dg-label" x="360" y="206" text-anchor="middle">that one rule IS the policy surface: intercept before, inspect after</text>
+
+  <g class="dg-node n-cordis" transform="translate(200,240)" data-dg-title="Where waterfall lives in the harness" data-dg-body="#t4-uses" data-dg-src="packages/core/agent-loop/src/agent.ts:340-400|agent/pre-step · agent/request">
+    <rect width="340" height="70" rx="10"/><text x="170" y="24" text-anchor="middle">agent/pre-step · agent/request · llm/stream</text><text x="170" y="44" text-anchor="middle" class="sub">tools/pre-execute · tools/post-execute</text><text x="170" y="60" text-anchor="middle" class="sub">session/announce · approval gates</text>
+  </g>
+</svg>
+<figcaption>The four simple modes are convenience. <b>Waterfall is where the product lives</b> —
+every admission, request, and tool call passes through a chain anyone can hook.</figcaption>
+</figure>
+
+<h2>Waterfall: the rule that unlocks everything</h2>
+<p>A waterfall listener has signature <code>(payload, next) => result</code>. To pass control
+down the chain, it calls <code>next()</code>. To inspect or mutate around the inner call, it can
+do work before <i>and after</i>:</p>
+
+<pre><code>// a guard that wraps every tool execution
+ctx.on('tools/pre-execute', async (call, next) => {
+  if (!policy.allows(call.name)) return denied(call)   // ← short-circuit: never reaches the tool
+  const result = await next(call)                       // ← delegate; resumes with inner result
+  audit.log(call.name, result)
+  return result
+})</code></pre>
+
+<p>This is the <b>middleware pattern</b> you know from Express/Koa — except here it's a
+language-level event primitive, and the whole harness's policy surface is built from it:</p>
+<ul>
+  <li><code>agent/pre-step</code> — "should this step even reach the model?" (budgets, compaction)</li>
+  <li><code>agent/request</code> — last chance to mutate the outgoing request (headers, plan-mode tweaks)</li>
+  <li><code>llm/stream</code> — wrap the live stream (telemetry, redaction)</li>
+  <li><code>tools/pre-execute</code> / <code>tools/post-execute</code> — approval, injection, result shaping</li>
+</ul>
+
+<div class="callout warn">
+  <span class="tag">The rule</span>
+  <p>AGENTS.md enshrines it: <b>"Waterfall listeners MUST call <code>next()</code> to delegate;
+  returning without it short-circuits the chain."</b> That asymmetry is deliberate — a listener
+  that doesn't delegate <i>is the policy</i>. Forgetting <code>next()</code> is the single easiest
+  bug to write, and the codebase's #1 footgun. When a tool call silently never runs, suspect a
+  waterfall hook upstream that returned early.</p>
+</div>
+
+<h2>Where the modes appear</h2>
+<table class="cat">
+  <tr><th>Event</th><th>Mode</th><th>Why that mode</th></tr>
+  <tr><td><code>ready</code>, <code>dispose</code>, <code>internal/*</code></td><td>emit / serial</td><td>Lifecycle — observers only</td></tr>
+  <tr><td><code>agent/pre-step</code>, <code>agent/request</code></td><td>waterfall</td><td>Admit/transform the outgoing call</td></tr>
+  <tr><td><code>llm/stream</code></td><td>waterfall</td><td>Wrap the streaming call (e.g. for approval or metrics)</td></tr>
+  <tr><td><code>tools/pre-execute</code>, <code>tools/post-execute</code></td><td>waterfall</td><td>Guard, redact, reshape tool calls</td></tr>
+  <tr><td><code>agent/status</code>, <code>agent/*-changed</code></td><td>emit</td><td>UI/telemetry fan-out — never awaited</td></tr>
+  <tr><td><code>session/announce</code></td><td>waterfall</td><td>Session creation can be vetoed/enriched</td></tr>
+</table>
+
+<details class="deeper"><summary>Go deeper: the event map is TypeScript-mergeable</summary>
+<div class="deeper-body">
+<p>Event names are <i>typed</i> via declaration merging into <code>EventMap</code> — a plugin that
+emits <code>'llm/adapters-updated'</code> merges its payload type into the map, so a
+<code>ctx.on('llm/adapters-updated', (payload) => ...)</code> gets the right type and a typo'd
+name is a compile error. The repo's doc convention requires <code>@mode</code> and payload
+<code>@param</code> JSDoc on every declared event — scan
+<a class="code" data-src="packages/core/agent/src/index.ts">packages/core/agent/src/index.ts</a>
+to see the pattern. That's also how docs and reference pages stay truthful: the type IS the catalog.</p>
+</div></details>
+
+<details class="deeper"><summary>Go deeper: scoped events with keys</summary>
+<div class="deeper-body">
+<p>Scope-keyed events let a listener subscribe only to events about a specific entity:
+<code>ctx.on('agent/status', agent.scope.key, fn)</code> fires only for that agent. This is how the
+UI watches one session without filtering global noise, and it's what the preset/scope machinery
+(lesson 11) uses to give each agent its own event plane.</p>
+</div></details>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> A tool call needs an approval prompt that can block it. Which event mode?</p>
+  <div class="opts">
+    <button>emit — fire the prompt and don't wait</button>
+    <button data-ok>waterfall — a listener returns early to deny, or calls next() to allow</button>
+    <button>parallel — race the prompt against the tool</button>
+  </div>
+  <p class="why">Approval is interception: you want a chance to <b>prevent</b> delegation, not just
+  observe it. Only waterfall gives you <code>next()</code>-or-don't.</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> Why does the loop's <code>agent/status</code> use <code>emit</code> instead of <code>parallel</code>?</p>
+  <div class="opts">
+    <button>emit is faster</button>
+    <button data-ok>The loop must not await UI listeners — status is observability, not a dependency</button>
+    <button>parallel doesn't exist in Cordis</button>
+  </div>
+  <p class="why">If the loop awaited UI listeners, a slow UI would stall tool execution. Emit means
+  "here's a fact; do with it what you will" — the loop continues immediately.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Read <a class="code" data-src="vendor/cordis/src/events.ts" data-lines="131-340">events.ts</a>
+top-down — the mode dispatch is a small readable kernel. Then find one waterfall usage:
+<code>ctx.on('agent/pre-step', ...)</code> in the compaction package is a good one.</p>
+
+<button class="mark-done" data-lesson="4"></button>
+
+<nav class="lesson-nav">
+  <a href="0003-plugins-fibers-effects.html" rel="prev">← lesson 3: plugins, fibers &amp; effects</a>
+  <a href="0005-composition.html" rel="next">lesson 5: composition — YAML to app →</a>
+</nav>
+
+</main>
+
+<template id="t4-emit"><p><code>emit(name, ...args)</code> → every listener, synchronously fired, not
+awaited. Use for facts: "this happened." UI updates, telemetry, status.</p></template>
+<template id="t4-parallel"><p>All listeners run concurrently; the dispatch resolves when they all
+resolve. "Everyone needs to be done before I proceed."</p></template>
+<template id="t4-serial"><p>Listeners run one at a time, in registration order. A listener that
+returns truthy bails the chain early — sequential but still short-circuitable.</p></template>
+<template id="t4-bail"><p>Sync dispatch; stops at the first listener that returns truthy. For
+winner-take-all lookups ("who handles this URI?").</p></template>
+<template id="t4-waterfall"><p>The dispatch walks a chain where each listener gets
+<code>(payload, next)</code>. Calling <code>next()</code> delegates inward; the innermost callee
+resolves and the result bubbles back out. Around-style middleware.</p></template>
+<template id="t4-l1"><p>An outer hook: can veto by not calling <code>next()</code>, or transform the
+payload before delegating, or transform the result on the way back out.</p></template>
+<template id="t4-l2"><p>Another layer — any number of these; registration order is the chain order.</p></template>
+<template id="t4-inner"><p>The actual callee — e.g. "run the tool", "emit the request", "open the
+session." It sees the payload after every outer hook has had its say.</p></template>
+<template id="t4-uses"><p>Almost every extensible decision in the harness is a waterfall: pre-step
+admission, request mutation, stream wrapping, tool gating, session announce. Learning the
+waterfall event names is 80% of learning the policy surface.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dsh-base patch tour — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<nav class="crumb"><a href="../index.html">dsh course</a><span class="crumb-sep">›</span><span class="here">reference · dsh-base patch tour</span></nav>
+<main class="wide">
+<h1><code>dsh-base</code> patch tour</h1>
+<p class="lede">The base bundle's <a class="code" data-src="packages/bundle/base/cordis.patch.yml">cordis.patch.yml</a>
+is the closest thing this repo has to a "definition of the product" — ~90 rows that every
+base-backed profile shares. This page walks it region by region. Open the file beside this page
+and read along.</p>
+
+<div class="callout key"><span class="tag">How to read it</span>
+<p>Rows share one shape: <code>- id: &lt;key&gt;</code> · <code>name: '&lt;pkg&gt;'</code> · optional
+<code>config:</code> · optional <code>disabled: !!js …</code>. Row order is for readers — fibers
+activate in dependency order, so you can read the file as grouped capabilities, not a sequence.</p></div>
+
+<h2>Region map</h2>
+<table class="cat">
+<tr><th>Lines</th><th>Region</th><th>Rows that matter</th></tr>
+<tr><td>~15–32</td><td><b>Runtime &amp; lifecycle</b></td><td><code>plugin-manager</code>, <code>hmr</code> — <code>!!js "!ctx.get('profileContext')"</code> means they only run on a real launch, not a dump</td></tr>
+<tr><td>~34–89</td><td><b>The spine</b></td><td><code>llm</code>, <code>session</code>, <code>typert*</code>, <code>session-title*</code>, <code>agent</code>, <code>agent-default-model</code> — the services everything injects</td></tr>
+<tr><td>~91–182</td><td><b>Identity, settings, storage, telemetry</b></td><td><code>settings</code>, <code>credentials</code>, <code>authorization</code>, <code>session-persistence-jsonl</code>, <code>storage*</code>, <code>otel</code></td></tr>
+<tr><td>~188–245</td><td><b>Execution capability</b></td><td><code>subprocess</code>, <code>sandbox</code>, <code>sandbox-policy</code>, <code>bash-sandbox</code>, <code>pwsh-sandbox</code> — the confinement seam</td></tr>
+<tr><td>~245–267</td><td><b>Safety policy</b></td><td><code>approval</code>, <code>permission</code>, <code>shell-env</code> — gates in front of tool execution</td></tr>
+<tr><td>~267–320</td><td><b>The tools</b></td><td><code>tool-bash</code>, <code>tool-fs*</code>, <code>tool-jobs</code>, <code>agent-instructions</code>, <code>skill*</code>, <code>commands</code>, <code>goal*</code>, <code>plan-mode</code></td></tr>
+<tr><td>~322–365</td><td><b>Loop-adjacent policies</b></td><td><code>token-meter</code>, <code>compaction-basic</code>, <code>command-compact</code>, <code>subagent*</code> — waterfalls on pre-step/compaction/delegation</td></tr>
+<tr><td>~367–455</td><td><b>Tool policy &amp; PTC</b></td><td><code>timeout-policy</code>, <code>spill-*</code>, <code>session-checkpoint-policy</code>, <code>tool-result-pruner</code>, <code>image-offload</code>, <code>tool-todo/goal/ralph</code>, <code>ptc-runtime</code>, <code>workflow-*</code></td></tr>
+<tr><td>~472–499</td><td><b>Web capability &amp; MCP</b></td><td><code>web</code>, <code>web-search-deepseek</code>, <code>web-fetch-http</code>, <code>tool-web</code>, <code>mcp-resources</code></td></tr>
+<tr><td>~499–528</td><td><b>The registry rows</b></td><td><code>tools</code>, <code>system-prompt</code>, <code>agent-loop</code>, <code>fs-sandbox</code>, <code>llm-deepseek*</code> — the services late in the file because nothing depends on <i>their</i> order</td></tr>
+</table>
+
+<h2>Reading one row properly</h2>
+<pre><code>- id: tool-bash
+  name: '@deepseek-ai/dsh-tool-bash'
+  disabled: !!js process.platform === 'win32'</code></pre>
+<ul>
+  <li><b><code>id: tool-bash</code></b> — the stable handle. Other patches (profile, home, --patch)
+  address this row by <code>id</code>; the registry and diagnostics report by it.</li>
+  <li><b><code>name:</code></b> — the module specifier the Loader resolves to a package/plugin.</li>
+  <li><b><code>disabled:</code></b> — a <code>!!js</code> predicate; <code>tool-bash</code> and
+  <code>tool-pwsh</code> are platform-gated so only the OS-appropriate one mounts.</li>
+</ul>
+
+<h2>Why the "spine" rows sit where they do</h2>
+<p>The first ~90 lines front-load the services every other plugin injects — <code>llm</code>,
+<code>session</code>, <code>typert</code>, <code>agent</code> — not because order matters at runtime
+(it doesn't), but because <b>a reader should meet the foundation before the decoration</b>. The
+file's comment says it outright: "the grouping is for readers." Reading top-to-bottom is a
+guided tour from most-fundamental to most-specialized.</p>
+
+<h2>The config payloads</h2>
+<p>Some rows carry inline <code>config:</code> — small, deployment-varying values the plugin's
+<code>Config</code> schema validates at mount:</p>
+<ul>
+  <li><code>session-title</code>/<code>session-title-llm</code> — title-generation bounds (max words, byte caps, timeouts).</li>
+  <li><code>hmr</code> — <code>root: []</code>, which module roots hot-reload watches.</li>
+  <li><code>agent-default-model</code> — the default provider/model route the launcher proposes.</li>
+</ul>
+<p>Everything else takes defaults — a row with no <code>config</code> runs on the plugin's schema
+defaults. The rule (per AGENTS.md): <b>deployment-varying choices are config, never a hidden
+constant</b> — so anything you might tune per-profile is reachable from a patch.</p>
+
+<div class="callout"><span class="tag">Try it</span>
+<p>Run <code>dsh --profile web --dump-config</code> and diff the output against this file — you'll
+see the bundle layer verbatim, then the <code>web-app</code> layer's inserts, then any user patches
+on top. That output <i>is</i> the running tree.</p></div>
+</main>
+<script src="../assets/course.js"></script>
+</body>
+</html>

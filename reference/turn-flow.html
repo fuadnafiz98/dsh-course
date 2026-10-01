@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turn-flow poster — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<nav class="crumb"><a href="../index.html">dsh course</a><span class="crumb-sep">›</span><span class="here">reference · turn-flow poster</span></nav>
+<main class="wide">
+<h1>Turn-flow poster</h1>
+<p class="lede">The complete lifecycle of one turn, end to end — the sequence diagram version of
+lesson 8. Left-to-right is <i>who</i> acts; top-to-bottom is <i>when</i>. Click any actor or edge
+for the source.</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 900 760" role="img" aria-label="Sequence diagram of one agent turn">
+  <defs><marker id="pah" markerWidth="9" markerHeight="9" refX="8" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7" fill="none" stroke="currentColor"/></marker></defs>
+
+  <!-- actors -->
+  <g class="dg-node n-surface" transform="translate(20,16)" data-dg-title="Caller / UI" data-dg-body="#p-caller"><rect width="130" height="40" rx="9"/><text x="65" y="24" text-anchor="middle">caller / UI</text></g>
+  <g class="dg-node n-core" transform="translate(180,16)" data-dg-title="ReactLoopAgent" data-dg-body="#p-loop" data-dg-src="packages/core/agent-loop/src/agent.ts:98|ReactLoopAgent"><rect width="150" height="40" rx="9"/><text x="75" y="24" text-anchor="middle">ReactLoopAgent</text></g>
+  <g class="dg-node n-cordis" transform="translate(360,16)" data-dg-title="plugin waterfalls" data-dg-body="#p-water"><rect width="140" height="40" rx="9"/><text x="70" y="24" text-anchor="middle">waterfall hooks</text></g>
+  <g class="dg-node n-store" transform="translate(530,16)" data-dg-title="Session log" data-dg-body="#p-log" data-dg-src="packages/core/session/src/index.ts:446|Session.append"><rect width="120" height="40" rx="9"/><text x="60" y="24" text-anchor="middle">session log</text></g>
+  <g class="dg-node n-tool" transform="translate(680,16)" data-dg-title="ctx.tools" data-dg-body="#p-tools" data-dg-src="packages/core/tools/src/index.ts:807|ToolRuntime"><rect width="90" height="40" rx="9"/><text x="45" y="24" text-anchor="middle">ctx.tools</text></g>
+  <g class="dg-node n-store" transform="translate(790,16)" data-dg-title="ctx.llm" data-dg-body="#p-llm" data-dg-src="packages/llm/llm/src/index.ts:342|LlmRuntime"><rect width="90" height="40" rx="9"/><text x="45" y="24" text-anchor="middle">ctx.llm</text></g>
+
+  <!-- lifelines -->
+  <line class="dg-edge dash" x1="85" y1="56" x2="85" y2="730" opacity=".35"/>
+  <line class="dg-edge dash" x1="255" y1="56" x2="255" y2="730" opacity=".35"/>
+  <line class="dg-edge dash" x1="430" y1="56" x2="430" y2="730" opacity=".35"/>
+  <line class="dg-edge dash" x1="590" y1="56" x2="590" y2="730" opacity=".35"/>
+  <line class="dg-edge dash" x1="725" y1="56" x2="725" y2="730" opacity=".35"/>
+  <line class="dg-edge dash" x1="835" y1="56" x2="835" y2="730" opacity=".35"/>
+
+  <!-- messages -->
+  <path class="dg-edge" d="M85 80 L251 80" marker-end="url(#pah)"/><text class="dg-label" x="170" y="74" text-anchor="middle">followup(msg)</text>
+  <path class="dg-edge" d="M255 105 L255 118"/><text class="dg-label" x="268" y="116">wakeDriver → running</text>
+  <path class="dg-edge" d="M255 140 L586 140" marker-end="url(#pah)"/><text class="dg-label" x="420" y="134" text-anchor="middle">append turn/start {turn}</text>
+
+  <path class="dg-edge" d="M255 168 L426 168" marker-end="url(#pah)"/><text class="dg-label" x="340" y="162" text-anchor="middle">preStep: claim + assemble</text>
+  <path class="dg-edge" d="M255 196 L426 196" marker-end="url(#pah)"/><text class="dg-label" x="340" y="190" text-anchor="middle" style="fill:var(--dg-event)">agent/pre-step (waterfall)</text>
+  <path class="dg-edge" d="M426 224 L259 224" marker-end="url(#pah)"/><text class="dg-label" x="340" y="218" text-anchor="middle">enter | reject</text>
+
+  <path class="dg-edge" d="M255 250 L586 250" marker-end="url(#pah)"/><text class="dg-label" x="420" y="244" text-anchor="middle">append step/start</text>
+  <path class="dg-edge" d="M255 278 L586 278" marker-end="url(#pah)"/><text class="dg-label" x="420" y="272" text-anchor="middle">append user/message ×N</text>
+
+  <path class="dg-edge" d="M255 306 L426 306" marker-end="url(#pah)"/><text class="dg-label" x="340" y="300" text-anchor="middle" style="fill:var(--dg-event)">agent/request (waterfall)</text>
+  <path class="dg-edge" d="M426 334 L831 334" marker-end="url(#pah)"/><text class="dg-label" x="630" y="328" text-anchor="middle">llm.prepareCall(config)</text>
+  <path class="dg-edge" d="M255 362 L586 362" marker-end="url(#pah)"/><text class="dg-label" x="420" y="356" text-anchor="middle">append request/header + request/context</text>
+  <path class="dg-edge" d="M255 390 L586 390" marker-end="url(#pah)"/><text class="dg-label" x="420" y="384" text-anchor="middle">session.deriveMessages() ← the log becomes the request</text>
+
+  <path class="dg-edge" d="M255 418 L831 418" marker-end="url(#pah)"/><text class="dg-label" x="540" y="412" text-anchor="middle">preparedCall.stream(request)</text>
+  <path class="dg-edge" d="M831 446 L259 446" marker-end="url(#pah)"/><text class="dg-label" x="540" y="440" text-anchor="middle">stream frames → emit agent/assistant-stream</text>
+  <path class="dg-edge" d="M255 474 L586 474" marker-end="url(#pah)"/><text class="dg-label" x="420" y="468" text-anchor="middle">append assistant/message (or assistant/attempt)</text>
+
+  <path class="dg-edge" d="M255 502 L721 502" marker-end="url(#pah)"/><text class="dg-label" x="490" y="496" text-anchor="middle">executeToolCalls → tools/pre-execute</text>
+  <path class="dg-edge" d="M725 530 L259 530" marker-end="url(#pah)"/><text class="dg-label" x="490" y="524" text-anchor="middle">execute → post-execute → tools/result</text>
+  <path class="dg-edge" d="M255 558 L586 558" marker-end="url(#pah)"/><text class="dg-label" x="420" y="552" text-anchor="middle">append tool/call + tool/result (model order)</text>
+
+  <path class="dg-edge" d="M255 586 L255 600"/><text class="dg-label" x="270" y="598">loop while more steps (model asked for tools / next-step input)</text>
+  <path class="dg-edge" d="M255 626 L426 626" marker-end="url(#pah)"/><text class="dg-label" x="340" y="620" text-anchor="middle">agent/turn-stopping (serial)</text>
+  <path class="dg-edge" d="M255 654 L586 654" marker-end="url(#pah)"/><text class="dg-label" x="420" y="648" text-anchor="middle">append turn/end { reason } — always, in finally</text>
+  <path class="dg-edge" d="M255 682 L89 682" marker-end="url(#pah)"/><text class="dg-label" x="170" y="676" text-anchor="middle">status: idle · result delivered</text>
+  <text class="dg-label" x="450" y="726" text-anchor="middle">every line that touches the session is a durable event; every waterfall is a hook point</text>
+</svg>
+<figcaption>One turn, end to end. Persisted lines land in the session log; the waterfalls
+(<span style="color:var(--dg-event)">pre-step · request · turn-stopping</span>, plus tool pre/post)
+are the policy surface.</figcaption>
+</figure>
+
+<h2>The durable events, in append order</h2>
+<table class="cat">
+<tr><th>#</th><th>Event</th><th>When</th></tr>
+<tr><td>1</td><td><code>turn/start</code></td><td>driver claims the turn</td></tr>
+<tr><td>2</td><td><code>step/start</code></td><td>a step is admitted</td></tr>
+<tr><td>3</td><td><code>user/message</code></td><td>claimed input enters the surface</td></tr>
+<tr><td>4</td><td><code>request/header</code> · <code>request/context</code></td><td>before the model call (when config/route changed)</td></tr>
+<tr><td>5</td><td><code>assistant/message</code> / <code>assistant/attempt</code></td><td>the settled stream</td></tr>
+<tr><td>6</td><td><code>tool/call</code> · <code>tool/result</code></td><td>per requested tool, in model order</td></tr>
+<tr><td>7</td><td><code>step/end</code> → (repeat 2–6 per step)</td><td>step closes</td></tr>
+<tr><td>8</td><td><code>turn/end</code></td><td>turn closes — always, even on throw</td></tr>
+</table>
+<p class="muted">That ordered sequence <i>is</i> the source of truth — the UI renders it, replay
+re-executes it, resume rebuilds from it.</p>
+</main>
+
+<template id="p-caller"><p>Anything that calls <code>agent.followup/steer/inject</code> — the web UI,
+the headless runner, the SDK, or a subagent's parent.</p></template>
+<template id="p-loop"><p>One per session. Owns the inbox, the phase machine, and every durable
+append — the transaction writer at the center of the system.</p></template>
+<template id="p-water"><p>Not one file — every <code>agent/pre-step</code>, <code>agent/request</code>,
+<code>agent/turn-stopping</code> listener mounted by policy plugins. This column is where
+customization happens.</p></template>
+<template id="p-log"><p><code>Session.append</code> — the append-only log. Everything model-visible
+or replay-relevant lands here as an event.</p></template>
+<template id="p-tools"><p><code>ctx.tools</code> — the registry + pre-execute/execute/post-execute
+pipeline each tool call flows through.</p></template>
+<template id="p-llm"><p><code>ctx.llm</code> — resolves the route to an adapter and returns the
+stream the loop settles.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

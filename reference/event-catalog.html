@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event catalog — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<nav class="crumb"><a href="../index.html">dsh course</a><span class="crumb-sep">›</span><span class="here">reference · event catalog</span></nav>
+<main class="wide">
+<h1>Event catalog</h1>
+<p class="lede">Every named channel in the harness — session events (durable), agent events (live),
+tool events, LLM events, and Cordis internals — with its dispatch mode and who produces/consumes it.
+Filter below.</p>
+<input class="filterbox" data-target="tr[data-filt]" type="search" placeholder="filter: try 'waterfall', 'agent/', 'tool/', 'emit'…" aria-label="Filter events">
+
+<h2>Session events — the durable log</h2>
+<p class="small muted">Appended to the append-only log; the surface/model view derives from them.
+Owner: <a class="code" data-src="packages/core/session/src/types.ts">core/session/types.ts</a></p>
+<table class="cat">
+<tr><th>Event</th><th>Surface?</th><th>Payload / purpose</th></tr>
+<tr data-filt="turn/start turn begin"><td><code>turn/start</code></td><td>no</td><td>{ turn } — opens a turn before input is claimed</td></tr>
+<tr data-filt="turn/end turn end reason"><td><code>turn/end</code></td><td>no</td><td>{ turn, reason: TurnEndReason } — completed/aborted/blocked/error/max-tokens/interrupted/forked</td></tr>
+<tr data-filt="step/start step begin"><td><code>step/start</code></td><td>no</td><td>{ turn, step } — opens a step (one model call + tools)</td></tr>
+<tr data-filt="step/end step end"><td><code>step/end</code></td><td>no</td><td>{ turn, step } — closes a step</td></tr>
+<tr data-filt="request/header request header config"><td><code>request/header</code></td><td>no</td><td>{ header: EpochHeader, reason } — call config + tools snapshot</td></tr>
+<tr data-filt="request/context route provider"><td><code>request/context</code></td><td>no</td><td>RequestContext — provider/model/context-window route</td></tr>
+<tr data-filt="system/message prompt"><td><code>system/message</code></td><td>yes (node 0)</td><td>The rendered system prompt</td></tr>
+<tr data-filt="user/message user prompt"><td><code>user/message</code></td><td>yes</td><td>Human prompt or synthetic injection (source distinguishes)</td></tr>
+<tr data-filt="developer/message"><td><code>developer/message</code></td><td>yes</td><td>Per-step dev context (e.g. tool-registry diffs)</td></tr>
+<tr data-filt="assistant/message model output"><td><code>assistant/message</code></td><td>yes</td><td>{ turn, step, message, stream, usage?, interrupted? } — settled step output</td></tr>
+<tr data-filt="assistant/attempt failed"><td><code>assistant/attempt</code></td><td>no</td><td>{ turn, step, stream } — a failed/cancelled attempt's stream</td></tr>
+<tr data-filt="tool/call"><td><code>tool/call</code></td><td>no</td><td>{ callId, name, arguments } — the model asked</td></tr>
+<tr data-filt="tool/result"><td><code>tool/result</code></td><td>yes</td><td>{ message, error?, meta? } — the tool's model-facing reply + UI card payload</td></tr>
+<tr data-filt="session/end-seed fork"><td><code>session/end-seed</code></td><td>no</td><td>{ inherited? } — the seed/live boundary in a forked log</td></tr>
+</table>
+
+<h2>Agent events — live, scope-keyed</h2>
+<p class="small muted">Emitted on the agent's scope; observed by UI/SDK, never durable. Owner:
+<a class="code" data-src="packages/core/agent/src/dispatch.ts">core/agent/dispatch.ts</a> +
+the loop.</p>
+<table class="cat">
+<tr><th>Event</th><th>Mode</th><th>Purpose</th></tr>
+<tr data-filt="agent/status status running idle"><td><code>agent/status</code></td><td>emit</td><td>{ status: 'idle'|'running' } on phase transitions</td></tr>
+<tr data-filt="agent/pre-step"><td><code>agent/pre-step</code></td><td>waterfall</td><td>Admit/reject/rewrite a step's admitted input — compaction, budgets</td></tr>
+<tr data-filt="agent/request"><td><code>agent/request</code></td><td>waterfall</td><td>Mutate the proposed call config before adapter binding</td></tr>
+<tr data-filt="agent/request-error"><td><code>agent/request-error</code></td><td>waterfall</td><td>Decide retry vs. fail on a stream error (per adapter retryPolicy)</td></tr>
+<tr data-filt="agent/turn-stopping"><td><code>agent/turn-stopping</code></td><td>serial</td><td>Last hook before a turn ends (continuation decisions)</td></tr>
+<tr data-filt="agent/assistant-stream stream frames"><td><code>agent/assistant-stream</code></td><td>emit</td><td>Live stream frames to listeners (UI)</td></tr>
+<tr data-filt="agent/error"><td><code>agent/error</code></td><td>emit</td><td>{ turn, step, error } reported at the live boundary</td></tr>
+</table>
+
+<h2>Tool events — the execution pipeline</h2>
+<p class="small muted">Owner: <a class="code" data-src="packages/core/tools/src/index.ts" data-lines="150-208">core/tools</a></p>
+<table class="cat">
+<tr><th>Event</th><th>Mode</th><th>Purpose</th></tr>
+<tr data-filt="tools/pre-execute"><td><code>tools/pre-execute</code></td><td>waterfall</td><td>Admit/veto a call before the body (approvals, guards)</td></tr>
+<tr data-filt="tools/execute"><td><code>tools/execute</code></td><td>waterfall</td><td>Wrap the tool body (timeout policies, telemetry)</td></tr>
+<tr data-filt="tools/post-execute"><td><code>tools/post-execute</code></td><td>waterfall</td><td>Reshape the committed result (redact, project content)</td></tr>
+<tr data-filt="tools/result"><td><code>tools/result</code></td><td>emit</td><td>The frozen outcome — observed, then appended as tool/result</td></tr>
+<tr data-filt="tools/change"><td><code>tools/change</code></td><td>emit</td><td>A tools registration layer changed — refresh schemas</td></tr>
+</table>
+
+<h2>LLM &amp; internal Cordis events</h2>
+<table class="cat">
+<tr><th>Event</th><th>Mode</th><th>Purpose</th></tr>
+<tr data-filt="llm/stream"><td><code>llm/stream</code></td><td>waterfall</td><td>Wrap the live model stream (telemetry, redaction)</td></tr>
+<tr data-filt="llm/adapters-updated"><td><code>llm/adapters-updated</code></td><td>emit</td><td>The provider registry changed (register/replace/dispose)</td></tr>
+<tr data-filt="session/announce"><td><code>session/announce</code></td><td>waterfall</td><td>A session is being published — veto/enrich</td></tr>
+<tr data-filt="session/event"><td><code>session/event</code></td><td>emit</td><td>An event was appended — persistence &amp; recovery observe</td></tr>
+<tr data-filt="ready dispose"><td><code>ready</code> / <code>dispose</code></td><td>emit</td><td>Cordis lifecycle — app up / tearing down</td></tr>
+<tr data-filt="internal/service internal/get internal/set"><td><code>internal/service</code> · <code>internal/get</code> · <code>internal/set</code></td><td>emit/waterfall</td><td>The service directory itself is observable/interceptable</td></tr>
+<tr data-filt="internal/listener internal/plugin internal/update"><td><code>internal/*</code></td><td>various</td><td>Loader, listener, plugin, and update internals — framework hooks</td></tr>
+</table>
+</main>
+<script src="../assets/course.js"></script>
+</body>
+</html>

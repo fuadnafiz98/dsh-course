@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11 · Scopes, realms &amp; presets — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 11 · scopes, realms &amp; presets</span>
+  <span class="spacer"></span>
+  <a href="../reference/cordis-api.html">cordis cheat sheet</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0011 · advanced · ~20 min</p>
+<h1>Scopes, realms &amp; presets</h1>
+
+<p class="lede">So far, every agent has shared the same services. But a real product needs
+<i>different</i> agents in one process: a main agent with every tool, a read-only subagent, a
+custom persona with its own prompt and tool subset. That's the <b>per-agent world</b> — built from
+Cordis's <code>isolate</code>, the scope primitive, and the preset system.</p>
+
+<h2>The problem: one process, many agent identities</h2>
+<p>A subagent that shouldn't run bash can't just have a "bash disabled" flag — the service
+<code>ctx.tools</code> is global. Deleting bash from it would break the parent. What's needed is a
+way to say: <i>"for this agent, <code>ctx.tools</code> resolves to a different registry."</i> That's
+the realm mechanism from lesson 2, made practical.</p>
+
+<h2>Layer 1 — <code>isolate</code> realms fork service resolution</h2>
+<p>Recall <code>ctx.isolate('tools', Symbol())</code>: it creates a child context where the
+<code>tools</code> name resolves under a fresh realm key. A provider mounted inside writes that
+private key — visible below the child, invisible to the parent. The parent and the child now have
+<b>two different <code>ctx.tools</code></b> that happen to share a name.</p>
+
+<h2>Layer 2 — the scope primitive tags registrations and routes events</h2>
+<p><a class="code" data-src="packages/core/scope/src/index.ts">packages/core/scope</a> is the
+product-level glue. <code>createScope(ctx, subject)</code> mints an agent-scoped context and a
+<b>ScopeKey</b> — an opaque identity object. Two directions flow through it:</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 760 330">
+  <defs><marker id="ah11" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+  <g class="dg-node n-cordis" transform="translate(280,20)" data-dg-title="root ctx" data-dg-body="#t11-root"><rect width="200" height="40" rx="9"/><text x="100" y="25" text-anchor="middle">root ctx · global registrations</text></g>
+  <path class="dg-edge" d="M340 60 L240 96" marker-end="url(#ah11)"/><path class="dg-edge" d="M420 60 L520 96" marker-end="url(#ah11)"/>
+  <text class="dg-label" x="268" y="86" text-anchor="middle">agent A's scope</text>
+  <text class="dg-label" x="560" y="86" text-anchor="middle">agent B's scope</text>
+  <g class="dg-node n-core" transform="translate(120,96)" data-dg-title="scope A" data-dg-body="#t11-a"><rect width="200" height="54" rx="9"/><text x="100" y="24" text-anchor="middle">scope A ctx</text><text x="100" y="41" text-anchor="middle" class="sub">isolate('tools') → scoped registry</text></g>
+  <g class="dg-node n-core" transform="translate(440,96)" data-dg-title="scope B" data-dg-body="#t11-b"><rect width="200" height="54" rx="9"/><text x="100" y="24" text-anchor="middle">scope B ctx</text><text x="100" y="41" text-anchor="middle" class="sub">isolate('compaction') → own realm</text></g>
+  <path class="dg-edge" d="M240 150 L240 184" marker-end="url(#ah11)"/>
+  <g class="dg-node n-tool" transform="translate(120,190)" data-dg-title="scope A sees a subset" data-dg-body="#t11-subset"><rect width="200" height="40" rx="9"/><text x="100" y="25" text-anchor="middle">tools: {read, glob} — no bash</text></g>
+  <g class="dg-node n-event" transform="translate(440,190)" data-dg-title="events route by key" data-dg-body="#t11-events"><rect width="200" height="40" rx="9"/><text x="100" y="25" text-anchor="middle">agent/* events tagged by key</text></g>
+  <text class="dg-label" x="380" y="270" text-anchor="middle">registrations inherit DOWN (child sees ancestors' layers)</text>
+  <text class="dg-label" x="380" y="290" text-anchor="middle">event admission extends UP (a parent listener sees a descendant's events)</text>
+</svg>
+<figcaption>Scope keys form a chain: registries layer downward (a child sees its ancestors'
+registrations), events propagate upward (a listener on an ancestor hears its descendants). One
+relation powers both.</figcaption>
+</figure>
+
+<h2>Layer 3 — ScopedLayers: registries that shadow</h2>
+<p>Services that need per-scope state build on <code>ScopedLayers</code>
+(<a class="code" data-src="packages/core/scope/src/store.ts">scope/src/store.ts</a>) — a
+scope-keyed map where a scoped registration <b>shadows</b> the global one. That's exactly what
+<code>ToolRuntime</code> uses: the global layer holds every registered tool, and an agent's scope
+layer can register a smaller set the model sees instead. <code>ctx.emit('tools/change')</code>
+fires whenever a layer changes, so the prompt's tool schemas stay live.</p>
+
+<h2>Layer 4 — presets compose a per-agent world</h2>
+<p>A <b>preset</b> (<code>dsh-agent-preset-registry</code>) is a named bundle of capabilities for
+composing one agent: which plugins mount in its scope, which persona/prompt sections, which tool
+subset. When a session creates an agent, the preset registry mounts a small subtree <i>inside that
+agent's scope</i> — so the agent's world is literally a plugin tree scoped to itself.</p>
+
+<pre><code>ctx.agents.create({ preset: 'reviewer', provider, model, session })
+//   → mounts the 'reviewer' preset's subtree inside a fresh scope
+//   → that agent's ctx.tools / ctx.compaction / prompt are its own</code></pre>
+
+<div class="callout key">
+  <span class="tag">Why presets exist</span>
+  <p>Presets are the answer to "how do I ship a specialized agent?" — a code reviewer, a read-only
+  explorer, a plan-mode agent — as <i>composition, not code</i>. The preset is a list of plugins
+  and config; the scope makes it isolated. New agent type = new preset, not a fork of the loop.</p>
+</div>
+
+<h2>Where you see it</h2>
+<ul>
+  <li><b>Subagents</b> — a spawned/forked child gets a scope; its tools and prompt can differ from the parent's.</li>
+  <li><b>PTC mode</b> — an agent scoped to "only <code>run_code</code>" is a scope-layered tool registry, not a special code path.</li>
+  <li><b>Plan mode / personas</b> — prompt sections and tool subsets per agent preset.</li>
+  <li><b>Scoped events</b> — the UI subscribes to one agent's <code>agent/*</code> feed by scope key.</li>
+</ul>
+
+<details class="deeper"><summary>Go deeper: scope parents and rebinding</summary>
+<div class="deeper-body">
+<p>Scope keys can form a parent chain via <code>linkScopeParent</code> — a child scope's registry
+view inherits down, and an event listener tagged with an ancestor receives descendant events.
+<code>ScopeParentBinding.rebind()</code> can re-link a key — used by "blank-session recompose": when
+a session's composition is rebuilt, its scope is re-parented so retained views keep resolving. This
+is subtle machinery; you only need it when implementing a scope-aware service.</p>
+</div></details>
+
+<details class="deeper"><summary>Go deeper: the durable record</summary>
+<div class="deeper-body">
+<p>A session's preset is persisted in <code>SessionHeader.agentPreset</code>
+(<a class="code" data-src="packages/core/session/src/types.ts" data-lines="124-131">types.ts:124-131</a>).
+Why durable? Because the preset decided the tools and prompt — resuming a session under a different
+composition would replay history the current model can no longer act on. The header pins which
+composition made the history.</p>
+</div></details>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> Two agents need different tool sets in one process. The mechanism?</p>
+  <div class="opts">
+    <button>Two separate processes</button>
+    <button data-ok>Each agent gets a scope; a scoped registry layer shadows the global tools for that agent</button>
+    <button>Filter tools at render time only</button>
+  </div>
+  <p class="why">Isolation is at service-resolution (<code>isolate</code> + <code>ScopedLayers</code>),
+  not presentation — the agent's <code>ctx.tools</code> genuinely resolves to a different view.</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> A preset is best described as…</p>
+  <div class="opts">
+    <button>A subclass of the agent loop</button>
+    <button data-ok>A named bundle of plugins + config mounted inside an agent's scope</button>
+    <button>A theme for the UI</button>
+  </div>
+  <p class="why">A preset is composition: which plugins, which prompt sections, which tools — mounted
+  in a scope so it only affects one agent. Specialization without forking the loop.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Read <a class="code" data-src="packages/core/scope/src/index.ts">scope/src/index.ts</a> (the
+<code>createScope</code>/<code>scopeTarget</code>/<code>ScopedLayers</code> trio) and
+<a class="code" data-src="packages/preset/agent-preset-registry/src/index.ts">agent-preset-registry</a>
+— then look at how <code>ctx.agents.create</code> routes a preset into a scoped subtree.</p>
+
+<button class="mark-done" data-lesson="11"></button>
+
+<nav class="lesson-nav">
+  <a href="0010-llm-seam.html" rel="prev">← lesson 10: the LLM seam</a>
+  <a href="0012-seams-and-beyond.html" rel="next">lesson 12: the wide map →</a>
+</nav>
+
+</main>
+
+<template id="t11-root"><p>The shared world — every global registration lives here. Descendants
+inherit them unless shadowed.</p></template>
+<template id="t11-a"><p>A scope key + an isolated realm: this agent's <code>ctx.tools</code> resolves
+to its own layered registry.</p></template>
+<template id="t11-b"><p>A different scope isolating a different service — realms are per-service, so
+agents can diverge on exactly one seam and share the rest.</p></template>
+<template id="t11-subset"><p>ScopedLayers: this scope registered a subset; the global layer's tools
+are shadowed for this agent only.</p></template>
+<template id="t11-events"><p>Scoped events: <code>agent/status</code>, <code>assistant-stream</code>
+etc. are dispatched under the agent's scope key — a listener on that key hears only that agent.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

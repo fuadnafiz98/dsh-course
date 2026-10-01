@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09 · The tool pipeline — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 9 · the tool pipeline</span>
+  <span class="spacer"></span>
+  <a href="../reference/source-map.html">source map</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0009 · core · ~20 min</p>
+<h1>The tool pipeline</h1>
+
+<p class="lede">A model produces a block like <code>{name:"bash", arguments:"{\"cmd\":\"ls\"}"}</code> —
+and the harness has to turn that into a real side effect, safely, durably, and in a way plugins can
+control. That's the tool pipeline: a registry (<code>ctx.tools</code>), a scheduler
+(<code>executeToolCalls</code>), and a chain of waterfalls around every single call.</p>
+
+<h2>Two files, two jobs</h2>
+<table class="cat">
+  <tr><th>File</th><th>Job</th></tr>
+  <tr><td><a class="code" data-src="packages/core/tools/src/index.ts" data-lines="807-">packages/core/tools/src/index.ts</a></td><td><code>ToolRuntime</code> — the registry (<code>ctx.tools</code>) and the per-call policy pipeline (<code>pre-execute → execute → post-execute</code>).</td></tr>
+  <tr><td><a class="code" data-src="packages/core/agent-loop/src/tool-calls.ts">packages/core/agent-loop/src/tool-calls.ts</a></td><td><code>executeToolCalls</code> — the step's scheduler: barriers, bounded parallelism, model-ordered commits, cancellation.</td></tr>
+</table>
+<p>Keep them separate in your head: <b>the scheduler decides <i>when and in what order</i>; the
+runtime decides <i>what happens around each call</i>.</b></p>
+
+<h2>What a tool is</h2>
+<p>A tool is a plugin that registers a <code>ToolDefinition</code> on <code>ctx.tools</code> —
+schema (name, params, description the model reads), an execution mode, and the body that runs it.
+The bash tool is the canonical example — it's just a row in the patch
+(<code>id: tool-bash</code>) whose plugin calls <code>ctx.tools.register(...)</code>. Nothing is
+special about it; the model-facing "bash" is literally a plugin you could unmount.</p>
+
+<h2>Per call: the waterfall sandwich</h2>
+<p>Every tool invocation passes through three waterfalls plus an observability emit
+(<a class="code" data-src="packages/core/tools/src/index.ts" data-lines="150-208">the event map</a>):</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 760 300">
+  <defs><marker id="ah9" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+  <g class="dg-node n-core" transform="translate(30,110)" data-dg-title="model emitted a tool-call block" data-dg-body="#t9-block"><rect width="140" height="54" rx="9"/><text x="70" y="24" text-anchor="middle">tool-call</text><text x="70" y="41" text-anchor="middle" class="sub">block in the message</text></g>
+  <path class="dg-edge" d="M170 137 L200 137" marker-end="url(#ah9)"/>
+  <g class="dg-node n-event" transform="translate(204,110)" data-dg-title="tools/pre-execute" data-dg-body="#t9-pre" data-dg-src="packages/core/tools/src/index.ts:153|tools/pre-execute">
+    <rect width="120" height="54" rx="9"/><text x="60" y="24" text-anchor="middle">pre-execute</text><text x="60" y="41" text-anchor="middle" class="sub">waterfall — admit/veto</text>
+  </g>
+  <path class="dg-edge" d="M324 137 L354 137" marker-end="url(#ah9)"/>
+  <g class="dg-node n-tool" transform="translate(358,110)" data-dg-title="tools/execute" data-dg-body="#t9-exec" data-dg-src="packages/core/tools/src/index.ts:164|tools/execute">
+    <rect width="120" height="54" rx="9"/><text x="60" y="24" text-anchor="middle">execute</text><text x="60" y="41" text-anchor="middle" class="sub">waterfall — the body</text>
+  </g>
+  <path class="dg-edge" d="M478 137 L508 137" marker-end="url(#ah9)"/>
+  <g class="dg-node n-event" transform="translate(512,110)" data-dg-title="tools/post-execute" data-dg-body="#t9-post" data-dg-src="packages/core/tools/src/index.ts:176|tools/post-execute">
+    <rect width="120" height="54" rx="9"/><text x="60" y="24" text-anchor="middle">post-execute</text><text x="60" y="41" text-anchor="middle" class="sub">waterfall — reshape</text>
+  </g>
+  <path class="dg-edge" d="M632 137 L662 137" marker-end="url(#ah9)"/>
+  <g class="dg-node n-core" transform="translate(666,110)" data-dg-title="tools/result + append" data-dg-body="#t9-result" data-dg-src="packages/core/tools/src/index.ts:198|tools/result">
+    <rect width="80" height="54" rx="9"/><text x="40" y="24" text-anchor="middle">result</text><text x="40" y="41" text-anchor="middle" class="sub">→ tool/result</text>
+  </g>
+  <text class="dg-label" x="388" y="80" text-anchor="middle">every stage is a waterfall — a hook can veto, transform, or wrap the call</text>
+  <text class="dg-label" x="388" y="200" text-anchor="middle">approval gates live in pre-execute · timeouts wrap execute · redaction/content-projection lives in post-execute</text>
+  <text class="dg-label" x="388" y="220" text-anchor="middle">tools/result is an emit — the committed, frozen outcome every observer sees</text>
+</svg>
+<figcaption>One call = pre-execute → execute → post-execute → a durable tool/result. Each waterfall
+is a place a policy plugin can intervene — approvals, timeouts, sandboxing, redaction.</figcaption>
+</figure>
+
+<ul>
+  <li><b><code>tools/pre-execute</code></b> — admit or veto before the body runs. Approval prompts
+  ("may I run this command?") and guards hook here.</li>
+  <li><b><code>tools/execute</code></b> — wraps the body itself. A timeout policy
+  (<code>dsh-tool-call-timeout-policy</code>) is literally a <code>tools/execute</code> wrapper that
+  races the body against a clock.</li>
+  <li><b><code>tools/post-execute</code></b> — reshape the committed result before the model sees it
+  (content projection, redaction).</li>
+  <li><b><code>tools/result</code></b> — an <code>emit</code>, not a waterfall: the frozen outcome for
+  observers/UI, after which the loop appends the durable <code>tool/result</code> event.</li>
+</ul>
+
+<h2>The scheduler: barriers + bounded parallelism</h2>
+<p><code>executeToolCalls</code> (<a class="code" data-src="packages/core/agent-loop/src/tool-calls.ts" data-lines="60-102">tool-calls.ts:60-102</a>)
+groups a step's calls by their live <b>execution mode</b>:</p>
+<ul>
+  <li><b><code>exclusive</code></b> — a barrier: runs alone, waits for everything in flight to finish
+  first (e.g. a tool that changes working directory).</li>
+  <li><b><code>parallel</code></b> — a rolling pool bounded by
+  <code>agentLoop.config.maxParallelToolCalls</code>; calls dispatch overlapping but <b>results always
+  commit in model order</b>.</li>
+</ul>
+
+<p>Two guarantees make it durable instead of clever:</p>
+<ul>
+  <li><b>Model-ordered commits.</b> The <code>commitReady()</code> loop only appends a
+  <code>tool/result</code> once every earlier slot has settled — so the log's tool/result order
+  always matches the order the model requested, even when executions finish out of order.</li>
+  <li><b>Abort is honest.</b> On cancellation, started calls drain and commit their real results;
+  calls that never started get a <i>synthetic</i> <code>tool/result</code>
+  (<code>appendSkippedToolCall</code>,
+  <a class="code" data-src="packages/core/agent-loop/src/tool-calls.ts" data-lines="249-260">tool-calls.ts:249-260</a>)
+  so the log stays valid for replay — the model's call always has a matching result.</li>
+</ul>
+
+<div class="callout key">
+  <span class="tag">The rule</span>
+  <p>The session log's invariant — <i>every model-visible call has a matching result</i> — is
+  enforced by the scheduler. It's why a cancelled turn still replays cleanly: skipped calls get
+  recorded error results rather than dangling.</p>
+</div>
+
+<h2>Scoped tools — the seam under presets</h2>
+<p><code>ToolRuntime</code> isn't a flat map — it's <code>ScopedLayers</code>
+(<a class="code" data-src="packages/core/tools/src/index.ts" data-lines="833-">index.ts:833</a>):
+registrations can be global or scoped to an agent's scope key. So two agents in one process can see
+<i>different tool sets</i> — a subagent with a read-only subset, a PTC agent presenting only
+<code>run_code</code>. That's the same isolate/realm machinery from lesson 2 surfacing at the tool
+layer, and lesson 11 builds on it.</p>
+
+<details class="deeper"><summary>Go deeper: the scheduler's staged API</summary>
+<div class="deeper-body">
+<p>The runtime exposes an internal <code>[TOOL_RUNTIME_SCHEDULER]</code> staging view with
+<code>prepare / dispatch / finalize / finish</code> (<a class="code" data-src="packages/core/tools/src/index.ts" data-lines="815-821">index.ts:815-821</a>).
+<code>prepare</code> runs the pre-execute stage and can short-circuit a call to a
+<code>post-result</code> or <code>final-result</code> without ever dispatching the body — that's how
+a guard denies a call cleanly while still producing a well-formed result.</p>
+</div></details>
+
+<details class="deeper"><summary>Go deeper: presentation vs execution</summary>
+<div class="deeper-body">
+<p>The result the model gets and the card the UI renders are different concerns. A tool can attach
+a private <code>meta</code> payload to its <code>tool/result</code> (e.g. a result-time diff) that
+persists verbatim — opaque to the core — and a <code>presentResult</code> hook reads it back to
+reproduce the same card on replay. Model-facing contract and UI presentation stay separate by
+design.</p>
+</div></details>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> The model asks for 5 parallel tool calls and a user hits cancel mid-flight. What reaches the log?</p>
+  <div class="opts">
+    <button>Nothing — the aborted calls vanish</button>
+    <button data-ok>Started calls commit real results; unstarted calls get a synthetic 'aborted before dispatch' result</button>
+    <button>All five get error results regardless</button>
+  </div>
+  <p class="why">The scheduler drains started calls and appends synthetic results for the rest —
+  every model-visible <code>tool/call</code> pairs with a <code>tool/result</code>, so the log stays
+  replayable.</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> Where would an "approve before running bash" feature hook in?</p>
+  <div class="opts">
+    <button>tools/post-execute</button>
+    <button data-ok>tools/pre-execute — it can veto the call before the body runs</button>
+    <button>agent/request</button>
+  </div>
+  <p class="why">Approval must precede the side effect — <code>tools/pre-execute</code> is the
+  admit/veto waterfall. Post-execute only shapes results after the fact.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Read <a class="code" data-src="packages/core/agent-loop/src/tool-calls.ts">tool-calls.ts</a>
+top-to-bottom — the <code>runGroup</code> scheduler is the single most instructive concurrency
+pattern in the codebase. Then look at how one tool (e.g. <code>dsh-tool-bash</code>) registers
+itself.</p>
+
+<button class="mark-done" data-lesson="9"></button>
+
+<nav class="lesson-nav">
+  <a href="0008-agent-loop.html" rel="prev">← lesson 8: the agent loop</a>
+  <a href="0010-llm-seam.html" rel="next">lesson 10: the LLM seam →</a>
+</nav>
+
+</main>
+
+<template id="t9-block"><p>A <code>tool-call</code> content block in the settled assistant message —
+<code>callId</code>, <code>name</code>, raw <code>arguments</code> JSON.</p></template>
+<template id="t9-pre"><p><code>tools/pre-execute</code>: admit or veto. Approvals, guards, and policy
+live here — a hook that returns without <code>next()</code> denies the call.</p></template>
+<template id="t9-exec"><p><code>tools/execute</code>: wraps the tool body itself — timeout policies
+and telemetry wrap here by delegating to <code>next()</code> around the real run.</p></template>
+<template id="t9-post"><p><code>tools/post-execute</code>: reshape the settled result — content
+projection, redaction, summarization — before the model sees it.</p></template>
+<template id="t9-result"><p><code>tools/result</code> (emit) publishes the frozen outcome, then the
+loop appends the durable <code>tool/result</code> event citing its <code>tool/call</code> seq.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>

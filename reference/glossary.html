@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glossary — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<nav class="crumb"><a href="../index.html">dsh course</a><span class="crumb-sep">›</span><span class="here">reference · glossary</span></nav>
+<main>
+<h1>Glossary</h1>
+<p class="lede">Every term in one place. Type to filter; each entry links to the source that owns the concept.</p>
+<input class="filterbox" data-target="tr[data-filt]" type="search" placeholder="filter terms…" aria-label="Filter glossary">
+
+<table class="cat" id="glossary">
+<tr><th style="width:160px">Term</th><th>Meaning</th><th>Owner</th></tr>
+
+<tr data-filt="agent"><td><b>Agent</b></td><td>One driven session: the object that owns a session, an inbox, and a loop driver.</td><td><a class="code" data-src="packages/core/agent/src/index.ts">core/agent</a></td></tr>
+<tr data-filt="adapter provider route llm"><td><b>Adapter</b></td><td>A plugin that translates between the canonical message vocabulary and one provider's wire protocol.</td><td><a class="code" data-src="packages/llm/llm/src/index.ts">llm/llm</a></td></tr>
+<tr data-filt="attempt assistant/attempt failed"><td><b>assistant/attempt</b></td><td>A durable event for a model call that committed no surface message — failed, retried, or cancelled.</td><td><a class="code" data-src="packages/core/session/src/types.ts">session/types</a></td></tr>
+<tr data-filt="bundle"><td><b>Bundle</b></td><td>A shipped composition unit: a cordis.patch.yml plus the plugin code its rows mount.</td><td><a class="code" data-src="packages/bundle/">bundle/</a></td></tr>
+<tr data-filt="capability seam"><td><b>Capability seam</b></td><td>A Definition/Provider/Consumer triple — the unit of swappability (e.g. shell, fs, subagents).</td><td><a class="code" data-src="docs/glossary.md">docs/glossary</a></td></tr>
+<tr data-filt="context ctx"><td><b>Context (ctx)</b></td><td>The proxied service/event/plugin world every plugin receives.</td><td><a class="code" data-src="vendor/cordis/src/context.ts">vendor/cordis</a></td></tr>
+<tr data-filt="effect disposer"><td><b>Effect</b></td><td>A registered setup with a disposer, owned by a fiber, undone in reverse order on unload.</td><td><a class="code" data-src="vendor/cordis/src/fiber.ts">fiber.ts</a></td></tr>
+<tr data-filt="entry row"><td><b>Entry / row</b></td><td>One line of a config tree: id, name (module), config, disabled.</td><td><a class="code" data-src="vendor/loader/src/">loader</a></td></tr>
+<tr data-filt="fiber"><td><b>Fiber</b></td><td>The runtime instance of one mounted plugin — its lifecycle, deps, and effect stack.</td><td><a class="code" data-src="vendor/cordis/src/fiber.ts">fiber.ts</a></td></tr>
+<tr data-filt="inject"><td><b>inject</b></td><td>A plugin's declared service dependencies; the fiber stays PENDING until all required ones exist.</td><td><a class="code" data-src="vendor/cordis/src/registry.ts">registry.ts</a></td></tr>
+<tr data-filt="isolate realm"><td><b>Isolate / realm</b></td><td>ctx.isolate forks one service's resolution — same name, different impl, below a child context.</td><td><a class="code" data-src="vendor/cordis/src/context.ts">context.ts</a></td></tr>
+<tr data-filt="patch"><td><b>Patch</b></td><td>A list of row edits (insert + id-targeted config replaces); last layer wins per row.</td><td><a class="code" data-src="vendor/include/src/">include</a></td></tr>
+<tr data-filt="preset"><td><b>Preset</b></td><td>A named per-agent composition: plugins + prompt + tool subset mounted inside a scope.</td><td><a class="code" data-src="packages/preset/">preset/</a></td></tr>
+<tr data-filt="profile"><td><b>Profile</b></td><td>A named composition — an ordered bundle list plus the user's own patch layer.</td><td><a class="code" data-src="apps/cli/src/profile-boot.ts">profile-boot</a></td></tr>
+<tr data-filt="scope"><td><b>Scope / ScopeKey</b></td><td>An opaque agent identity that routes registrations (down) and events (up).</td><td><a class="code" data-src="packages/core/scope/src/index.ts">core/scope</a></td></tr>
+<tr data-filt="session"><td><b>Session</b></td><td>An append-only SessionEvent log + its derived model-visible surface.</td><td><a class="code" data-src="packages/core/session/src/index.ts">core/session</a></td></tr>
+<tr data-filt="surface"><td><b>Surface</b></td><td>The ordered, model-visible subset of session events — what the next request sends.</td><td><a class="code" data-src="packages/core/session/src/surface.ts">surface.ts</a></td></tr>
+<tr data-filt="step"><td><b>Step</b></td><td>One model call plus the tool executions it requested.</td><td><a class="code" data-src="packages/core/agent-loop/src/agent.ts">agent-loop</a></td></tr>
+<tr data-filt="turn"><td><b>Turn</b></td><td>One "go" at user input — one or more steps, ending in a TurnEndReason.</td><td><a class="code" data-src="packages/core/agent-loop/src/agent.ts">agent-loop</a></td></tr>
+<tr data-filt="waterfall"><td><b>Waterfall</b></td><td>Middleware dispatch: each listener gets (payload, next) and must call next() to delegate.</td><td><a class="code" data-src="vendor/cordis/src/events.ts">events.ts</a></td></tr>
+<tr data-filt="service"><td><b>Service</b></td><td>A class that registers itself as ctx.&lt;name&gt; — auto-removed when its fiber unloads.</td><td><a class="code" data-src="vendor/cordis/src/service.ts">service.ts</a></td></tr>
+<tr data-filt="inbox"><td><b>Inbox</b></td><td>Queued input in two lanes (next-turn, next-step) that the loop claims per step.</td><td><a class="code" data-src="packages/core/agent-loop/src/inbox.ts">inbox.ts</a></td></tr>
+<tr data-filt="!!js"><td><b>!!js</b></td><td>A cordis.yml tag: a JS expression evaluated at load against the boot context.</td><td><a class="code" data-src="vendor/include/src/">include</a></td></tr>
+<tr data-filt="dsh-home"><td><b>$DSH_HOME</b></td><td>The harness home (~/.dsh): profiles, sessions, home patch, .env.</td><td><a class="code" data-src="packages/util/home-paths/">home-paths</a></td></tr>
+</table>
+</main>
+<script src="../assets/course.js"></script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08 · The agent loop — DeepSeek Harness course</title>
+<link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+
+<nav class="crumb">
+  <a href="../index.html">dsh course</a>
+  <span class="crumb-sep">›</span>
+  <span class="here">lesson 8 · the agent loop</span>
+  <span class="spacer"></span>
+  <a href="../reference/turn-flow.html">turn-flow poster</a>
+</nav>
+
+<main>
+
+<p class="src-line">lesson 0008 · core · ~25 min — the centerpiece</p>
+<h1>The agent loop</h1>
+
+<p class="lede">Everything so far was scaffolding. This is the driver: <code>ReactLoopAgent</code> in
+<a class="code" data-src="packages/core/agent-loop/src/agent.ts">packages/core/agent-loop/src/agent.ts</a>.
+One object per session, ~690 lines, and — this is the punchline — <b>it's just a plugin</b>. By the
+end you'll be able to read the whole turn lifecycle as a program.</p>
+
+<h2>The vocabulary</h2>
+<table class="cat">
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td><b>Turn</b></td><td>One "go" at the user's input — may contain many steps. Bracketed by <code>turn/start</code> / <code>turn/end</code>.</td></tr>
+  <tr><td><b>Step</b></td><td>One model call + the tool executions it requested. Bracketed by <code>step/start</code> / <code>step/end</code>.</td></tr>
+  <tr><td><b>Inbox</b></td><td>Queued user/steering/injected input, in two lanes (<code>next-turn</code> vs <code>next-step</code>).</td></tr>
+  <tr><td><b>Phase</b></td><td>The driver's state: <code>idle</code> → <code>running</code> (a driver owns turns) or <code>maintenance</code>.</td></tr>
+  <tr><td><b>Dispatch</b></td><td>A fused event emitter that fires all the <code>agent/*</code> events for this agent.</td></tr>
+</table>
+
+<h2>One picture: the whole turn</h2>
+<figure class="diagram">
+<svg viewBox="0 0 780 660">
+  <defs><marker id="ah8" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
+
+  <g class="dg-node n-surface" transform="translate(300,14)" data-dg-title="Input arrives" data-dg-body="#t8-send" data-dg-src="packages/core/agent-loop/src/agent.ts:154-181|send / followup / steer / inject">
+    <rect width="180" height="40" rx="9"/><text x="90" y="24" text-anchor="middle">send() / followup()</text>
+  </g>
+  <path class="dg-edge" d="M390 54 L390 76" marker-end="url(#ah8)"/>
+  <g class="dg-node n-cordis" transform="translate(300,82)" data-dg-title="Inbox + wake" data-dg-body="#t8-inbox" data-dg-src="packages/core/agent-loop/src/inbox.ts|ReactLoopInbox">
+    <rect width="180" height="40" rx="9"/><text x="90" y="24" text-anchor="middle">inbox.splice → wakeDriver</text>
+  </g>
+  <path class="dg-edge" d="M390 122 L390 144" marker-end="url(#ah8)"/>
+  <g class="dg-node n-core" transform="translate(290,150)" data-dg-title="turn()" data-dg-body="#t8-turn" data-dg-src="packages/core/agent-loop/src/agent.ts:296-396|turn()">
+    <rect width="200" height="44" rx="9"/><text x="100" y="20" text-anchor="middle">turn() — append turn/start</text><text x="100" y="37" text-anchor="middle" class="sub">then loop steps until the turn ends</text>
+  </g>
+
+  <path class="dg-edge" d="M390 194 L390 218" marker-end="url(#ah8)"/>
+  <g class="dg-node n-core" transform="translate(290,224)" data-dg-title="preStep() — admit the step" data-dg-body="#t8-prestep" data-dg-src="packages/core/agent-loop/src/agent.ts:267-286|preStep()">
+    <rect width="200" height="56" rx="9"/><text x="100" y="20" text-anchor="middle">preStep()</text><text x="100" y="37" text-anchor="middle" class="sub">claim input → assemble prompt →</text><text x="100" y="51" text-anchor="middle" class="sub">agent/pre-step waterfall</text>
+  </g>
+
+  <path class="dg-edge" d="M390 280 L390 304" marker-end="url(#ah8)"/>
+  <g class="dg-node n-core" transform="translate(290,310)" data-dg-title="step() — prepare + build" data-dg-body="#t8-prepare" data-dg-src="packages/core/agent-loop/src/agent.ts:546-687|prepareRequest · buildRequest">
+    <rect width="200" height="66" rx="9"/><text x="100" y="20" text-anchor="middle">step(): prepareRequest()</text><text x="100" y="37" text-anchor="middle" class="sub">agent/request waterfall → llm.prepareCall</text><text x="100" y="52" text-anchor="middle" class="sub">buildRequest → request/header + deriveMessages</text>
+  </g>
+
+  <path class="dg-edge" d="M390 376 L390 400" marker-end="url(#ah8)"/>
+  <g class="dg-node n-store" transform="translate(290,406)" data-dg-title="stream the model call" data-dg-body="#t8-stream" data-dg-src="packages/core/agent-loop/src/agent.ts:426-486|stream loop">
+    <rect width="200" height="54" rx="9"/><text x="100" y="22" text-anchor="middle">preparedCall.stream(request)</text><text x="100" y="39" text-anchor="middle" class="sub">each frame → agent/assistant-stream</text>
+  </g>
+
+  <path class="dg-edge" d="M390 460 L390 484" marker-end="url(#ah8)"/>
+  <g class="dg-node n-event" transform="translate(270,490)" data-dg-title="settle the assistant message" data-dg-body="#t8-settle" data-dg-src="packages/core/agent-loop/src/agent.ts:512-533|assistant/message append">
+    <rect width="240" height="44" rx="9"/><text x="120" y="19" text-anchor="middle">settle: assistant/message</text><text x="120" y="36" text-anchor="middle" class="sub">(or assistant/attempt on failure)</text>
+  </g>
+
+  <path class="dg-edge" d="M390 534 L390 558" marker-end="url(#ah8)"/>
+  <g class="dg-node n-tool" transform="translate(290,564)" data-dg-title="execute tool calls" data-dg-body="#t8-tools" data-dg-src="packages/core/agent-loop/src/tool-calls.ts|executeToolCalls">
+    <rect width="200" height="44" rx="9"/><text x="90" y="19" text-anchor="middle">executeToolCalls()</text><text x="90" y="36" text-anchor="middle" class="sub">tool/call → tool/result, in order</text>
+  </g>
+
+  <path class="dg-edge" d="M390 608 L390 626" marker-end="url(#ah8)"/>
+  <g class="dg-node n-cordis" transform="translate(290,632)" data-dg-title="turn ends" data-dg-body="#t8-end">
+    <rect width="200" height="26" rx="9"/><text x="100" y="17" text-anchor="middle">turn/end { reason }</text>
+  </g>
+
+  <text class="dg-label" x="640" y="338" text-anchor="middle">waterfalls at every joint —</text>
+  <text class="dg-label" x="640" y="356" text-anchor="middle">pre-step · request · stream</text>
+  <text class="dg-label" x="640" y="374" text-anchor="middle">turn-stopping · request-error</text>
+</svg>
+<figcaption>One turn, top to bottom. Click each stage. The dashed line is the seam where policy
+waterfalls hook in — there are hooks at <i>every</i> decision point.</figcaption>
+</figure>
+
+<h2>The phase machine</h2>
+<p>The driver isn't a loop you <code>await</code> — it's a state machine that runs itself
+(<a class="code" data-src="packages/core/agent-loop/src/agent.ts" data-lines="42-50">Phase type</a>):</p>
+<pre><code>type Phase =
+  | { kind: 'idle'; lastTurn: number }
+  | { kind: 'maintenance'; abort; lastTurn; wakeRequested }
+  | { kind: 'running'; abort; turn; step; wakeRequested }</code></pre>
+<p><code>idle → running</code> happens inside <code>wakeDriver()</code>
+(<a class="code" data-src="packages/core/agent-loop/src/agent.ts" data-lines="214-235">agent.ts:214-235</a>),
+which spins up one driver task that calls <code>turn()</code> in a <code>while</code> until the inbox
+is empty. <code>cancel()</code> doesn't kill the driver — it aborts the phase's
+<code>AbortController</code>, and the driver exits through the normal <code>finally</code> that
+appends <code>turn/end</code>. That symmetry is why cancellation never orphans a turn in the log.</p>
+
+<h2>Step admission — where policy hooks in</h2>
+<p><code>preStep()</code>
+(<a class="code" data-src="packages/core/agent-loop/src/agent.ts" data-lines="267-286">agent.ts:267-286</a>)
+is the front door of every step:</p>
+<ol>
+  <li><b>Claim</b> input from the inbox lane (<code>next-turn</code> for a fresh turn, <code>next-step</code> mid-turn).</li>
+  <li><b>Assemble the prompt</b> — <code>ctx.systemPrompt.assemble()</code> gathers registered sections + tool schemas.</li>
+  <li><b>Project runtime context</b> — a synthetic user-role message with cwd, file changes, etc.</li>
+  <li><b>Run the <code>agent/pre-step</code> waterfall</b> — any plugin can reject the step
+  (<code>{kind:'reject'}</code> → turn ends <code>blocked</code>) or rewrite the admitted messages.
+  Compaction hooks here.</li>
+</ol>
+<p>If the decision is <code>enter</code>, the loop appends <code>step/start</code> and calls
+<code>step()</code>.</p>
+
+<h2>Request preparation — the config is a waterfall</h2>
+<p><code>prepareRequest()</code>
+(<a class="code" data-src="packages/core/agent-loop/src/agent.ts" data-lines="546-596">agent.ts:546-596</a>)
+builds the call config through another waterfall:</p>
+<ul>
+  <li>Seed config = the agent's declared <code>{provider, model}</code> route + persisted effort settings.</li>
+  <li><code>agent/request</code> waterfall → plugins mutate the proposal (a plugin could swap the model, cap max_tokens, inject headers).</li>
+  <li><code>ctx.llm.prepareCall(config)</code> binds the provider adapter — lesson 10. If no adapter exists (<code>NO_ADAPTER</code>), the loop still proceeds with the raw config so middleware can serve it.</li>
+</ul>
+<p>Then <code>buildRequest()</code>
+(<a class="code" data-src="packages/core/agent-loop/src/agent.ts" data-lines="599-687">agent.ts:599-687</a>)
+does the durable bookkeeping: appends <code>request/header</code> (initial / resume / change /
+series), detects tool-registry diffs and logs them as a <code>developer/message</code>, then calls
+<code>session.deriveMessages()</code> — <b>the exact point where the session log becomes the model's
+context</b> — and freezes the result into the request.</p>
+
+<h2>The stream — and what "settle" means</h2>
+<p>The model call is a stream; each frame is emitted live as <code>agent/assistant-stream</code>
+for the UI. But <b>durability is the point</b>: the loop accumulates the stream in an
+<code>AssistantStreamAttempt</code> and then <i>settles</i> it:</p>
+<ul>
+  <li><b>Success</b> → <code>assistant/message</code> (surface event: text + reasoning + tool calls + the exact stream + usage).</li>
+  <li><b>Aborted mid-stream with content</b> → <code>assistant/message</code> with <code>interrupted: true</code>.</li>
+  <li><b>Failure / empty abort</b> → <code>assistant/attempt</code> — the failed stream, durable, so retry never fabricates history.</li>
+</ul>
+<p>That settle step is the "model-visible ⟺ logged" rule in action: whatever the model would see
+next turn is already an event.</p>
+
+<h2>Tool calls and the turn boundary</h2>
+<p>If the settled message contains <code>tool-call</code> blocks,
+<code>executeToolCalls()</code> (<a class="code" data-src="packages/core/agent-loop/src/tool-calls.ts">tool-calls.ts</a>)
+runs them — that's lesson 9. Each emits <code>tool/call</code> then <code>tool/result</code>. When
+they finish, the step decides the turn's fate: <code>completed</code> if the model is done, or the
+loop continues for another step if the model asked for tools. <code>turn/end { reason }</code> is
+always appended in the <code>finally</code> — even on a throw — which is why the log can never hold
+an unclosed turn.</p>
+
+<div class="callout key">
+  <span class="tag">The whole lesson in one sentence</span>
+  <p>The loop is a <b>transaction writer</b>: for each step it claims input → admits via
+  <code>pre-step</code> → prepares config via <code>agent/request</code> → logs the request header →
+  streams → settles an assistant event → runs tools → and always writes <code>turn/end</code>.
+  Every seam is a waterfall; every effect is durable.</p>
+</div>
+
+<details class="deeper"><summary>Go deeper: the inbox's two lanes</summary>
+<div class="deeper-body">
+<p><code>InboxTarget</code> is <code>'next-turn' | 'next-step'</code>. <code>followup()</code> queues to
+<code>next-turn</code> (a new turn), <code>steer()</code> to <code>next-step</code> (mid-turn nudge),
+<code>inject()</code> to <code>next-step</code> without a wake. <code>claim(target)</code> drains a
+lane. The subtlety — documented in <code>send()</code>'s comment — is that a wake message can't join
+an aborted activity: it's reclassified to <code>next-turn</code> so a cancellation never swallows
+fresh input.</p>
+</div></details>
+
+<details class="deeper"><summary>Go deeper: the fused dispatch</summary>
+<div class="deeper-body">
+<p><code>agentEvents(loopCtx, this)</code>
+(<a class="code" data-src="packages/core/agent/src/dispatch.ts">agent/src/dispatch.ts</a>) builds one
+object with every <code>agent/*</code> emit/waterfall pre-bound to this agent's scope. Built once in
+the constructor so hot-path emits don't allocate — a small, deliberate performance choice.
+Scope-keyed events (lesson 4's scoped subscription) let the UI listen to <i>this</i> agent's stream
+without filtering a global feed.</p>
+</div></details>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> Where in the loop does the session log actually become the model's context?</p>
+  <div class="opts">
+    <button>In preStep(), when the inbox is claimed</button>
+    <button data-ok>In buildRequest(), at session.deriveMessages()</button>
+    <button>In the LLM adapter, before the wire call</button>
+  </div>
+  <p class="why"><code>buildRequest</code> derives the message list from the session surface and
+  freezes it into the request — the durable log is the single source of the model's context.</p>
+</div>
+
+<div class="quiz">
+  <p class="q"><span class="tag">RETRIEVAL</span> A plugin wants to reject a step before the model sees it. Where does it hook?</p>
+  <div class="opts">
+    <button>agent/request</button>
+    <button data-ok>agent/pre-step — return { kind: 'reject' }</button>
+    <button>tools/pre-execute</button>
+  </div>
+  <p class="why"><code>agent/pre-step</code> is the admission waterfall — rejecting there ends the
+  turn as <code>blocked</code> before a request is ever built.</p>
+</div>
+
+<p class="callout"><span class="tag">PRIMARY SOURCE</span>
+Read <a class="code" data-src="packages/core/agent-loop/src/agent.ts">agent.ts</a> in order —
+<code>send → wakeDriver → kick → turn → preStep → step → prepareRequest → buildRequest</code>. It's
+the most important file in the repo; this lesson is your map for it. Then open
+<a class="code" data-src="docs/agent-lifecycle.md">docs/agent-lifecycle.md</a> — its Mermaid
+sequence diagram is the same flow from the outside.</p>
+
+<button class="mark-done" data-lesson="8"></button>
+
+<nav class="lesson-nav">
+  <a href="0007-session-log.html" rel="prev">← lesson 7: the session log</a>
+  <a href="0009-tools-pipeline.html" rel="next">lesson 9: the tool pipeline →</a>
+</nav>
+
+</main>
+
+<template id="t8-send"><p>Entry points: <code>send</code> (generic), <code>followup</code> (new turn),
+<code>steer</code> (mid-turn nudge), <code>inject</code> (context without a wake). All route through
+the inbox.</p></template>
+<template id="t8-inbox"><p>Two lanes: <code>next-turn</code> and <code>next-step</code>. A wake spins
+the driver if idle; a wake on an aborted phase is reclassified so cancellation never eats input.</p></template>
+<template id="t8-turn"><p>Appends <code>turn/start</code>, then loops steps until the turn ends —
+always closing with <code>turn/end { reason }</code> in a <code>finally</code>.</p></template>
+<template id="t8-prestep"><p>Claims input, assembles the system prompt, projects runtime context, and
+runs the <code>agent/pre-step</code> waterfall — the admission gate where compaction and budgets
+live.</p></template>
+<template id="t8-prepare"><p><code>prepareRequest</code> runs the <code>agent/request</code> waterfall
+then binds an adapter via <code>ctx.llm.prepareCall</code>; <code>buildRequest</code> logs the
+header and derives the message list from the session surface.</p></template>
+<template id="t8-stream"><p>The adapter's stream; each frame emits <code>agent/assistant-stream</code>
+for live UI. Accumulated in an <code>AssistantStreamAttempt</code> for settlement.</p></template>
+<template id="t8-settle"><p>The stream becomes durable: a settled <code>assistant/message</code> (or
+<code>assistant/attempt</code> on failure) — with the exact raw stream embedded.</p></template>
+<template id="t8-tools"><p><code>executeToolCalls</code> runs the model's tool blocks — barriers and
+bounded parallelism — and appends each <code>tool/result</code> in model order. Lesson 9.</p></template>
+<template id="t8-end"><p><code>turn/end</code> carries a <code>TurnEndReason</code>:
+completed / aborted / blocked / error / max-tokens / interrupted / forked. Always appended, even on
+throw.</p></template>
+
+<script src="../assets/course.js"></script>
+</body>
+</html>
