@@ -22,7 +22,7 @@
 
 <main>
 
-<p class="src-line">lesson 0001 · foundations · ~15 min</p>
+<p class="src-line"><i class="ph ph-shapes"></i> lesson 0001 · foundations · ~15 min</p>
 <h1>The shape of dsh</h1>
 
 <p class="lede">Before we open a single source file, you need the one idea that makes this entire
@@ -128,7 +128,7 @@ all just rows. There is no privileged core to patch because <b>the core is rows 
   <tr><td><code>.agents/</code></td><td>Agent-facing workflows and the <b>notes</b> archive — the decision records explaining <i>why</i> the code looks this way.</td></tr>
 </table>
 
-<details class="deeper"><summary>Go deeper: why vendored Cordis?</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: why vendored Cordis?</summary>
 <div class="deeper-body">
 <p>Cordis is copied into <code>vendor/</code> rather than depended on from npm, so the harness
 <b>owns its framework layer</b>: auditable, patchable, pinned. The manifest of what's vendored,
@@ -139,7 +139,7 @@ resolution, volatile config, Node loader internals…). When you read <code>vend
 you're reading upstream Cordis plus those patches.</p>
 </div></details>
 
-<details class="deeper"><summary>Go deeper: "spatiotemporal composability"</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: "spatiotemporal composability"</summary>
 <div class="deeper-body">
 <p>The README cites a paper — <a href="https://arxiv.org/abs/2608.25512" target="_blank" rel="noopener"><i>A Programming Paradigm for Spatiotemporal Composability</i></a> —
 which is Cordis's theory: plugins compose in <i>space</i> (contexts and scoped realms) and

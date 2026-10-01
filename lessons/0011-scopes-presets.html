@@ -22,7 +22,7 @@
 
 <main>
 
-<p class="src-line">lesson 0011 · advanced · ~20 min</p>
+<p class="src-line"><i class="ph ph-rocket"></i> lesson 0011 · advanced · ~20 min</p>
 <h1>Scopes, realms &amp; presets</h1>
 
 <p class="lede">So far, every agent has shared the same services. But a real product needs
@@ -100,7 +100,7 @@ agent's scope</i> — so the agent's world is literally a plugin tree scoped to 
   <li><b>Scoped events</b> — the UI subscribes to one agent's <code>agent/*</code> feed by scope key.</li>
 </ul>
 
-<details class="deeper"><summary>Go deeper: scope parents and rebinding</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: scope parents and rebinding</summary>
 <div class="deeper-body">
 <p>Scope keys can form a parent chain via <code>linkScopeParent</code> — a child scope's registry
 view inherits down, and an event listener tagged with an ancestor receives descendant events.
@@ -109,7 +109,7 @@ a session's composition is rebuilt, its scope is re-parented so retained views k
 is subtle machinery; you only need it when implementing a scope-aware service.</p>
 </div></details>
 
-<details class="deeper"><summary>Go deeper: the durable record</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: the durable record</summary>
 <div class="deeper-body">
 <p>A session's preset is persisted in <code>SessionHeader.agentPreset</code>
 (<a class="code" data-src="packages/core/session/src/types.ts" data-lines="124-131">types.ts:124-131</a>).

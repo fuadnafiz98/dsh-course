@@ -22,7 +22,7 @@
 
 <main>
 
-<p class="src-line">lesson 0004 · cordis · ~15 min</p>
+<p class="src-line"><i class="ph ph-puzzle-piece"></i> lesson 0004 · cordis · ~15 min</p>
 <h1>Events: the five dispatch modes</h1>
 
 <p class="lede">Services answer "who can I call?" Events answer "who can I notify — and do I want
@@ -129,7 +129,7 @@ language-level event primitive, and the whole harness's policy surface is built 
   <tr><td><code>session/announce</code></td><td>waterfall</td><td>Session creation can be vetoed/enriched</td></tr>
 </table>
 
-<details class="deeper"><summary>Go deeper: the event map is TypeScript-mergeable</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: the event map is TypeScript-mergeable</summary>
 <div class="deeper-body">
 <p>Event names are <i>typed</i> via declaration merging into <code>EventMap</code> — a plugin that
 emits <code>'llm/adapters-updated'</code> merges its payload type into the map, so a
@@ -140,7 +140,7 @@ name is a compile error. The repo's doc convention requires <code>@mode</code> a
 to see the pattern. That's also how docs and reference pages stay truthful: the type IS the catalog.</p>
 </div></details>
 
-<details class="deeper"><summary>Go deeper: scoped events with keys</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: scoped events with keys</summary>
 <div class="deeper-body">
 <p>Scope-keyed events let a listener subscribe only to events about a specific entity:
 <code>ctx.on('agent/status', agent.scope.key, fn)</code> fires only for that agent. This is how the

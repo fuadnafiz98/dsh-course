@@ -22,7 +22,7 @@
 
 <main>
 
-<p class="src-line">lesson 0005 · composition · ~18 min</p>
+<p class="src-line"><i class="ph ph-git-merge"></i> lesson 0005 · composition · ~18 min</p>
 <h1>cordis.yml, patches &amp; profiles</h1>
 
 <p class="lede">You've seen that <i>running</i> a plugin creates a fiber. Now the question before it:
@@ -153,7 +153,7 @@ The shipped templates are in <code>packages/bundle/*/</code>:</p>
 <p>So "dsh web vs dsh headless" is literally "which bundle stack". Same engine; the outermost
 rows differ.</p>
 
-<details class="deeper"><summary>Go deeper: the Loader + Include split</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: the Loader + Include split</summary>
 <div class="deeper-body">
 <p>Two vendored packages cooperate: <b>Loader</b>
 (<a class="code" data-src="vendor/loader/src/index.ts">vendor/loader/src</a>) turns entry rows into
@@ -167,7 +167,7 @@ without any module loading. The product-level API is <code>boot()</code> in
 creates the root Context, mounts Loader, hands the composed tree to Include, waits for settlement.</p>
 </div></details>
 
-<details class="deeper"><summary>Go deeper: what --dump-config actually shows</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: what --dump-config actually shows</summary>
 <div class="deeper-body">
 <p><code>dsh --profile web --dump-config</code> boots just far enough to compose the tree — it
 mounts Loader, applies all patch layers, prints the effective <code>cordis.yml</code>, and exits

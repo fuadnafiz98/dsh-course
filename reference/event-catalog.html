@@ -17,7 +17,7 @@
 <p class="lede">Every named channel in the harness — session events (durable), agent events (live),
 tool events, LLM events, and Cordis internals — with its dispatch mode and who produces/consumes it.
 Filter below.</p>
-<input class="filterbox" data-target="tr[data-filt]" type="search" placeholder="filter: try 'waterfall', 'agent/', 'tool/', 'emit'…" aria-label="Filter events">
+<div class="filter-wrap"><i class="ph ph-magnifying-glass"></i><input class="filterbox" data-target="tr[data-filt]" type="search" placeholder="filter: try 'waterfall', 'agent/', 'tool/', 'emit'…" aria-label="Filter events"></div>
 
 <h2>Session events — the durable log</h2>
 <p class="small muted">Appended to the append-only log; the surface/model view derives from them.

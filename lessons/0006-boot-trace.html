@@ -22,7 +22,7 @@
 
 <main>
 
-<p class="src-line">lesson 0006 · composition · ~18 min</p>
+<p class="src-line"><i class="ph ph-git-merge"></i> lesson 0006 · composition · ~18 min</p>
 <h1>Boot trace: <code>dsh web</code></h1>
 
 <p class="lede">Let's walk a real launch end to end, file by file. This is the "read these in order"
@@ -149,7 +149,7 @@ process's lifetime to whatever plugins are alive, and the app runs until somethi
 tree — a <code>webserver</code> plugin holding a listener keeps the event loop alive; a
 <code>headless-runner</code> disposes the tree when its one task finishes.</p>
 
-<details class="deeper"><summary>Go deeper: the startup audit, exactly</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: the startup audit, exactly</summary>
 <div class="deeper-body">
 <p><code>auditStartupEntries</code> doesn't require "everything activated" — it requires a specific
 id list (<code>agent-loop</code>, <code>webserver</code>, <code>modules</code>, <code>connection</code>,
@@ -160,7 +160,7 @@ for service: X)" rows that tell you exactly which dep never arrived. It's the di
 "plugin didn't load" and "plugin didn't load <i>because it was waiting for <code>ctx.shell</code></i>".</p>
 </div></details>
 
-<details class="deeper"><summary>Go deeper: disposal on boot failure</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: disposal on boot failure</summary>
 <div class="deeper-body">
 <p>If anything after <code>new Context()</code> throws, boot's <code>catch</code> awaits
 <code>ctx.fiber.dispose()</code> — the root fiber's disposal cascades to every mounted child, so a

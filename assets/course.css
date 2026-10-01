@@ -173,6 +173,30 @@ section { scroll-margin-top: 72px; }
 button.mark-done { display: inline-flex; align-items: center; gap: 7px; }
 .card .done-mark .ph { font-size: 15px; }
 .dg-panel header button .ph { font-size: 15px; }
+.card .num .ph, .src-line .ph { margin-right: .45em; }
+details.deeper > summary .ph-microscope { color: var(--ink-3); font-size: .95em; }
+
+/* icons that encode block type */
+.callout .tag::before, .quiz .q .tag::before {
+  font-family: "Phosphor";
+  margin-right: 7px;
+  vertical-align: -0.05em;
+}
+.callout .tag::before        { content: "\e348"; }  /* ph-note */
+.callout.key .tag::before    { content: "\e2dc"; }  /* ph-lightbulb */
+.callout.warn .tag           { color: var(--warn); }
+.callout.warn .tag::before   { content: "\e4e0"; }  /* ph-warning */
+.callout.danger .tag         { color: var(--danger); }
+.callout.danger .tag::before { content: "\e4e4"; }  /* ph-warning-octagon */
+.quiz .q .tag::before        { content: "\e74e"; }  /* ph-brain */
+
+/* figure captions carry the click hint */
+figure.diagram figcaption::before {
+  content: "\e7c8"; /* ph-cursor-click */
+  font-family: "Phosphor";
+  margin-right: 6px;
+  color: var(--ink-3);
+}
 
 /* ---------- top bar ---------- */
 .crumb {
@@ -586,6 +610,12 @@ button.mark-done.done {
 .toc { columns: 2; column-gap: 2.5em; font-size: .93em; }
 .toc li { break-inside: avoid; margin-bottom: .3em; }
 
+.filter-wrap { position: relative; margin: .8em 0 1.4em; }
+.filter-wrap .ph {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--ink-3); font-size: 15px; pointer-events: none;
+}
+.filter-wrap .filterbox { margin: 0; padding-left: 38px; }
 .filterbox {
   width: 100%;
   font-family: inherit; font-size: .9rem;

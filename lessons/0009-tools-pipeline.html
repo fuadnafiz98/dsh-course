@@ -22,7 +22,7 @@
 
 <main>
 
-<p class="src-line">lesson 0009 · core · ~20 min</p>
+<p class="src-line"><i class="ph ph-gear-six"></i> lesson 0009 · core · ~20 min</p>
 <h1>The tool pipeline</h1>
 
 <p class="lede">A model produces a block like <code>{name:"bash", arguments:"{\"cmd\":\"ls\"}"}</code> —
@@ -128,7 +128,7 @@ registrations can be global or scoped to an agent's scope key. So two agents in 
 <code>run_code</code>. That's the same isolate/realm machinery from lesson 2 surfacing at the tool
 layer, and lesson 11 builds on it.</p>
 
-<details class="deeper"><summary>Go deeper: the scheduler's staged API</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: the scheduler's staged API</summary>
 <div class="deeper-body">
 <p>The runtime exposes an internal <code>[TOOL_RUNTIME_SCHEDULER]</code> staging view with
 <code>prepare / dispatch / finalize / finish</code> (<a class="code" data-src="packages/core/tools/src/index.ts" data-lines="815-821">index.ts:815-821</a>).
@@ -137,7 +137,7 @@ layer, and lesson 11 builds on it.</p>
 a guard denies a call cleanly while still producing a well-formed result.</p>
 </div></details>
 
-<details class="deeper"><summary>Go deeper: presentation vs execution</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: presentation vs execution</summary>
 <div class="deeper-body">
 <p>The result the model gets and the card the UI renders are different concerns. A tool can attach
 a private <code>meta</code> payload to its <code>tool/result</code> (e.g. a result-time diff) that

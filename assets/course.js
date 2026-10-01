@@ -142,7 +142,9 @@
       var done = false;
       try { done = !!localStorage.getItem(doneKey(n)); } catch (e) {}
       btn.classList.toggle('done', done);
-      btn.innerHTML = done ? '<i class="ph ph-check"></i> Completed — click to undo' : 'Mark this lesson complete';
+      btn.innerHTML = done
+        ? '<i class="ph ph-check-circle"></i> Completed — click to undo'
+        : '<i class="ph ph-circle"></i> Mark this lesson complete';
     }
     btn.addEventListener('click', function () {
       try {

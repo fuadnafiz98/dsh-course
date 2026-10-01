@@ -22,7 +22,7 @@
 
 <main>
 
-<p class="src-line">lesson 0010 · core · ~15 min</p>
+<p class="src-line"><i class="ph ph-gear-six"></i> lesson 0010 · core · ~15 min</p>
 <h1>The LLM seam</h1>
 
 <p class="lede">The agent loop never imports a provider SDK. It calls <code>ctx.llm.stream(request)</code>
@@ -108,7 +108,7 @@ from deltas, or enforce a policy — around the actual model call, not beside it
 without re-admitting the step. The retry decision belongs to the provider's declared policy, not a
 hardcoded loop behavior — one more place the seam keeps provider knowledge out of the core.</p>
 
-<details class="deeper"><summary>Go deeper: the registry is atomic + observable</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: the registry is atomic + observable</summary>
 <div class="deeper-body">
 <p><code>registerAdapter</code> is all-or-nothing (a duplicate provider route throws
 <code>DUPLICATE_ADAPTER</code>), validates adapter metadata, and — unusually — fires

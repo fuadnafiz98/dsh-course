@@ -22,7 +22,7 @@
 
 <main>
 
-<p class="src-line">lesson 0003 · cordis · ~18 min</p>
+<p class="src-line"><i class="ph ph-puzzle-piece"></i> lesson 0003 · cordis · ~18 min</p>
 <h1>Plugins, fibers &amp; effects</h1>
 
 <p class="lede">A <b>plugin</b> in Cordis is just "something callable with a context and a config."
@@ -182,7 +182,7 @@ The whole app is a nested set of paired setup/teardown operations, which is prec
   this fiber's disposer stack.</li>
 </ol>
 
-<details class="deeper"><summary>Go deeper: volatile config and fiber reuse</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: volatile config and fiber reuse</summary>
 <div class="deeper-body">
 <p>A local modification in <code>vendor/README.md</code> documents <b>volatile config</b>: if a
 plugin's config changes in ways that don't require re-mounting, a fiber can update in place
@@ -192,7 +192,7 @@ with this lens: <code>update</code> is invoked on every dep/config change and de
 "wait more", "reuse", and "full restart".</p>
 </div></details>
 
-<details class="deeper"><summary>Go deeper: failure is a state, not a crash</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: failure is a state, not a crash</summary>
 <div class="deeper-body">
 <p>If <code>apply()</code> throws, the fiber moves to <code>FAILED</code> but doesn't vanish —
 it stays in the tree so <code>dsh --profile web --dump-config</code>, the web UI's fiber list,

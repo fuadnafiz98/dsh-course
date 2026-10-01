@@ -22,7 +22,7 @@
 
 <main>
 
-<p class="src-line">lesson 0008 · core · ~25 min — the centerpiece</p>
+<p class="src-line"><i class="ph ph-gear-six"></i> lesson 0008 · core · ~25 min — the centerpiece</p>
 <h1>The agent loop</h1>
 
 <p class="lede">Everything so far was scaffolding. This is the driver: <code>ReactLoopAgent</code> in
@@ -169,7 +169,7 @@ an unclosed turn.</p>
   Every seam is a waterfall; every effect is durable.</p>
 </div>
 
-<details class="deeper"><summary>Go deeper: the inbox's two lanes</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: the inbox's two lanes</summary>
 <div class="deeper-body">
 <p><code>InboxTarget</code> is <code>'next-turn' | 'next-step'</code>. <code>followup()</code> queues to
 <code>next-turn</code> (a new turn), <code>steer()</code> to <code>next-step</code> (mid-turn nudge),
@@ -179,7 +179,7 @@ an aborted activity: it's reclassified to <code>next-turn</code> so a cancellati
 fresh input.</p>
 </div></details>
 
-<details class="deeper"><summary>Go deeper: the fused dispatch</summary>
+<details class="deeper"><summary><i class="ph ph-microscope"></i> Go deeper: the fused dispatch</summary>
 <div class="deeper-body">
 <p><code>agentEvents(loopCtx, this)</code>
 (<a class="code" data-src="packages/core/agent/src/dispatch.ts">agent/src/dispatch.ts</a>) builds one
