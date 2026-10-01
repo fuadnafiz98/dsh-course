@@ -23,12 +23,12 @@ for the source.</p>
   <defs><marker id="pah" markerWidth="9" markerHeight="9" refX="8" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7" fill="none" stroke="currentColor"/></marker></defs>
 
   <!-- actors -->
-  <g class="dg-node n-surface" transform="translate(20,16)" data-dg-title="Caller / UI" data-dg-body="#p-caller"><rect width="130" height="40" rx="9"/><text x="65" y="24" text-anchor="middle">caller / UI</text></g>
-  <g class="dg-node n-core" transform="translate(180,16)" data-dg-title="ReactLoopAgent" data-dg-body="#p-loop" data-dg-src="packages/core/agent-loop/src/agent.ts:98|ReactLoopAgent"><rect width="150" height="40" rx="9"/><text x="75" y="24" text-anchor="middle">ReactLoopAgent</text></g>
-  <g class="dg-node n-cordis" transform="translate(360,16)" data-dg-title="plugin waterfalls" data-dg-body="#p-water"><rect width="140" height="40" rx="9"/><text x="70" y="24" text-anchor="middle">waterfall hooks</text></g>
-  <g class="dg-node n-store" transform="translate(530,16)" data-dg-title="Session log" data-dg-body="#p-log" data-dg-src="packages/core/session/src/index.ts:446|Session.append"><rect width="120" height="40" rx="9"/><text x="60" y="24" text-anchor="middle">session log</text></g>
-  <g class="dg-node n-tool" transform="translate(680,16)" data-dg-title="ctx.tools" data-dg-body="#p-tools" data-dg-src="packages/core/tools/src/index.ts:807|ToolRuntime"><rect width="90" height="40" rx="9"/><text x="45" y="24" text-anchor="middle">ctx.tools</text></g>
-  <g class="dg-node n-store" transform="translate(790,16)" data-dg-title="ctx.llm" data-dg-body="#p-llm" data-dg-src="packages/llm/llm/src/index.ts:342|LlmRuntime"><rect width="90" height="40" rx="9"/><text x="45" y="24" text-anchor="middle">ctx.llm</text></g>
+  <g class="dg-node n-surface" transform="translate(20,16)" data-dg-title="Caller / UI" data-dg-body="#p-caller"><rect width="130" height="40" rx="4"/><text x="65" y="24" text-anchor="middle">caller / UI</text></g>
+  <g class="dg-node n-core" transform="translate(180,16)" data-dg-title="ReactLoopAgent" data-dg-body="#p-loop" data-dg-src="packages/core/agent-loop/src/agent.ts:98|ReactLoopAgent"><rect width="150" height="40" rx="4"/><text x="75" y="24" text-anchor="middle">ReactLoopAgent</text></g>
+  <g class="dg-node n-cordis" transform="translate(360,16)" data-dg-title="plugin waterfalls" data-dg-body="#p-water"><rect width="140" height="40" rx="4"/><text x="70" y="24" text-anchor="middle">waterfall hooks</text></g>
+  <g class="dg-node n-store" transform="translate(530,16)" data-dg-title="Session log" data-dg-body="#p-log" data-dg-src="packages/core/session/src/index.ts:446|Session.append"><rect width="120" height="40" rx="4"/><text x="60" y="24" text-anchor="middle">session log</text></g>
+  <g class="dg-node n-tool" transform="translate(680,16)" data-dg-title="ctx.tools" data-dg-body="#p-tools" data-dg-src="packages/core/tools/src/index.ts:807|ToolRuntime"><rect width="90" height="40" rx="4"/><text x="45" y="24" text-anchor="middle">ctx.tools</text></g>
+  <g class="dg-node n-store" transform="translate(790,16)" data-dg-title="ctx.llm" data-dg-body="#p-llm" data-dg-src="packages/llm/llm/src/index.ts:342|LlmRuntime"><rect width="90" height="40" rx="4"/><text x="45" y="24" text-anchor="middle">ctx.llm</text></g>
 
   <!-- lifelines -->
   <line class="dg-edge dash" x1="85" y1="56" x2="85" y2="730" opacity=".35"/>
@@ -83,7 +83,7 @@ are the policy surface.</figcaption>
 <tr><td>4</td><td><code>request/header</code> · <code>request/context</code></td><td>before the model call (when config/route changed)</td></tr>
 <tr><td>5</td><td><code>assistant/message</code> / <code>assistant/attempt</code></td><td>the settled stream</td></tr>
 <tr><td>6</td><td><code>tool/call</code> · <code>tool/result</code></td><td>per requested tool, in model order</td></tr>
-<tr><td>7</td><td><code>step/end</code> → (repeat 2–6 per step)</td><td>step closes</td></tr>
+<tr><td>7</td><td><code>step/end</code> <i class="ph ph-arrow-right"></i> (repeat 2–6 per step)</td><td>step closes</td></tr>
 <tr><td>8</td><td><code>turn/end</code></td><td>turn closes — always, even on throw</td></tr>
 </table>
 <p class="muted">That ordered sequence <i>is</i> the source of truth — the UI renders it, replay

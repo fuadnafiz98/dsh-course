@@ -82,29 +82,29 @@ fiber activates and the plugin runs — and the declaration becomes a <i>runtime
   <defs><marker id="ah3" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
 
   <g class="dg-node n-cordis" transform="translate(40,30)" data-dg-title="Fiber created" data-dg-body="#t3-created" data-dg-src="vendor/cordis/src/fiber.ts:184-320|class Fiber">
-    <rect width="150" height="44" rx="9"/><text x="75" y="27" text-anchor="middle">CREATED</text>
+    <rect width="150" height="44" rx="4"/><text x="75" y="27" text-anchor="middle">CREATED</text>
   </g>
   <path class="dg-edge" d="M115 74 L115 104" marker-end="url(#ah3)"/>
   <text class="dg-label" x="125" y="95">update(): probe inject deps</text>
 
   <g class="dg-node n-event" transform="translate(40,110)" data-dg-title="PENDING — waiting on inject" data-dg-body="#t3-pending" data-dg-src="vendor/cordis/src/fiber.ts:321-372|Fiber.update()">
-    <rect width="150" height="44" rx="9"/><text x="75" y="27" text-anchor="middle">PENDING</text>
+    <rect width="150" height="44" rx="4"/><text x="75" y="27" text-anchor="middle">PENDING</text>
   </g>
   <path class="dg-edge" d="M115 154 L115 184" marker-end="url(#ah3)"/>
   <text class="dg-label" x="125" y="176">dep provided → internal/listener wakes it</text>
 
   <g class="dg-node n-core" transform="translate(40,190)" data-dg-title="ACTIVE — plugin running" data-dg-body="#t3-active" data-dg-src="vendor/cordis/src/fiber.ts:374-432|Fiber.start()">
-    <rect width="150" height="44" rx="9"/><text x="75" y="27" text-anchor="middle">ACTIVE</text>
+    <rect width="150" height="44" rx="4"/><text x="75" y="27" text-anchor="middle">ACTIVE</text>
   </g>
 
   <path class="dg-edge" d="M190 130 L280 130" marker-end="url(#ah3)"/>
   <g class="dg-node n-store" transform="translate(285,100)" data-dg-title="Dependency provided" data-dg-body="#t3-dep">
-    <rect width="170" height="60" rx="9"/><text x="85" y="24" text-anchor="middle">ctx.reflect.provide('tools')</text><text x="85" y="44" text-anchor="middle" class="sub">fires internal/service</text>
+    <rect width="170" height="60" rx="4"/><text x="85" y="24" text-anchor="middle">ctx.reflect.provide('tools')</text><text x="85" y="44" text-anchor="middle" class="sub">fires internal/service</text>
   </g>
 
   <path class="dg-edge" d="M190 212 L285 212" marker-end="url(#ah3)"/>
   <g class="dg-node n-core" transform="translate(290,182)" data-dg-title="Plugin runs, registers effects" data-dg-body="#t3-effects">
-    <rect width="200" height="60" rx="9"/><text x="100" y="22" text-anchor="middle">apply() / constructor runs</text><text x="100" y="42" text-anchor="middle" class="sub">every registration is an owned effect</text>
+    <rect width="200" height="60" rx="4"/><text x="100" y="22" text-anchor="middle">apply() / constructor runs</text><text x="100" y="42" text-anchor="middle" class="sub">every registration is an owned effect</text>
   </g>
 
   <path class="dg-edge" d="M370 154 L370 180"/>
@@ -112,12 +112,12 @@ fiber activates and the plugin runs — and the declaration becomes a <i>runtime
 
   <path class="dg-edge" d="M520 212 L620 212" marker-end="url(#ah3)"/>
   <g class="dg-node n-surface" transform="translate(625,182)" data-dg-title="Dependents can now activate" data-dg-body="#t3-dependents">
-    <rect width="120" height="60" rx="9"/><text x="60" y="24" text-anchor="middle">plugins that</text><text x="60" y="40" text-anchor="middle">injected it</text>
+    <rect width="120" height="60" rx="4"/><text x="60" y="24" text-anchor="middle">plugins that</text><text x="60" y="40" text-anchor="middle">injected it</text>
   </g>
 
   <path class="dg-edge" d="M370 242 L370 268" marker-end="url(#ah3)"/>
   <g class="dg-node n-event" transform="translate(270,272)" data-dg-title="Unload: reverse-order disposal" data-dg-body="#t3-unload" data-dg-src="vendor/cordis/src/fiber.ts:434-497|Fiber.dispose()">
-    <rect width="240" height="48" rx="9"/><text x="120" y="20" text-anchor="middle">UNLOAD: disposers run in reverse order</text><text x="120" y="37" text-anchor="middle" class="sub">service unregistered → dependents auto-unload too</text>
+    <rect width="240" height="48" rx="4"/><text x="120" y="20" text-anchor="middle">UNLOAD: disposers run in reverse order</text><text x="120" y="37" text-anchor="middle" class="sub">service unregistered → dependents auto-unload too</text>
   </g>
 </svg>
 <figcaption>Load order is a consequence of dependencies, not file order. And teardown is a mirror
@@ -175,8 +175,8 @@ The whole app is a nested set of paired setup/teardown operations, which is prec
   <li><b>Loader</b> sees an entry <code>{ name: '@deepseek-ai/dsh-tools', config: {...} }</code>
   and calls <code>ctx.plugin()</code> for it.</li>
   <li><b>Registry</b> resolves the module specifier to an import, creating a <b>Fiber</b>.</li>
-  <li>The fiber reads the plugin's <code>inject</code> static; deps absent → PENDING.</li>
-  <li>Deps arrive → <code>start()</code>: resolve config (interceptors first), call the plugin
+  <li>The fiber reads the plugin's <code>inject</code> static; deps absent <i class="ph ph-arrow-right"></i> PENDING.</li>
+  <li>Deps arrive <i class="ph ph-arrow-right"></i> <code>start()</code>: resolve config (interceptors first), call the plugin
   inside a child context, flip to ACTIVE.</li>
   <li>Inside <code>apply()</code>, every <code>ctx.on/provide/plugin/effect</code> is appended to
   this fiber's disposer stack.</li>
@@ -239,7 +239,7 @@ as a concrete plugin.</p>
 
 </main>
 
-<template id="t3-created"><p><code>ctx.plugin()</code> → Registry resolves the module → a Fiber is
+<template id="t3-created"><p><code>ctx.plugin()</code> <i class="ph ph-arrow-right"></i> Registry resolves the module <i class="ph ph-arrow-right"></i> a Fiber is
 allocated. It knows its plugin, its config slot, and its declared deps — nothing has run yet.</p></template>
 <template id="t3-pending"><p>Waiting state. The fiber has subscribed to internal service events; the
 first time every required dep resolves, it starts. Optional deps just get <code>undefined</code> in

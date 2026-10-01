@@ -53,28 +53,28 @@ special about it; the model-facing "bash" is literally a plugin you could unmoun
 <figure class="diagram">
 <svg viewBox="0 0 760 300">
   <defs><marker id="ah9" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
-  <g class="dg-node n-core" transform="translate(30,110)" data-dg-title="model emitted a tool-call block" data-dg-body="#t9-block"><rect width="140" height="54" rx="9"/><text x="70" y="24" text-anchor="middle">tool-call</text><text x="70" y="41" text-anchor="middle" class="sub">block in the message</text></g>
+  <g class="dg-node n-core" transform="translate(30,110)" data-dg-title="model emitted a tool-call block" data-dg-body="#t9-block"><rect width="140" height="54" rx="4"/><text x="70" y="24" text-anchor="middle">tool-call</text><text x="70" y="41" text-anchor="middle" class="sub">block in the message</text></g>
   <path class="dg-edge" d="M170 137 L200 137" marker-end="url(#ah9)"/>
   <g class="dg-node n-event" transform="translate(204,110)" data-dg-title="tools/pre-execute" data-dg-body="#t9-pre" data-dg-src="packages/core/tools/src/index.ts:153|tools/pre-execute">
-    <rect width="120" height="54" rx="9"/><text x="60" y="24" text-anchor="middle">pre-execute</text><text x="60" y="41" text-anchor="middle" class="sub">waterfall — admit/veto</text>
+    <rect width="120" height="54" rx="4"/><text x="60" y="24" text-anchor="middle">pre-execute</text><text x="60" y="41" text-anchor="middle" class="sub">waterfall — admit/veto</text>
   </g>
   <path class="dg-edge" d="M324 137 L354 137" marker-end="url(#ah9)"/>
   <g class="dg-node n-tool" transform="translate(358,110)" data-dg-title="tools/execute" data-dg-body="#t9-exec" data-dg-src="packages/core/tools/src/index.ts:164|tools/execute">
-    <rect width="120" height="54" rx="9"/><text x="60" y="24" text-anchor="middle">execute</text><text x="60" y="41" text-anchor="middle" class="sub">waterfall — the body</text>
+    <rect width="120" height="54" rx="4"/><text x="60" y="24" text-anchor="middle">execute</text><text x="60" y="41" text-anchor="middle" class="sub">waterfall — the body</text>
   </g>
   <path class="dg-edge" d="M478 137 L508 137" marker-end="url(#ah9)"/>
   <g class="dg-node n-event" transform="translate(512,110)" data-dg-title="tools/post-execute" data-dg-body="#t9-post" data-dg-src="packages/core/tools/src/index.ts:176|tools/post-execute">
-    <rect width="120" height="54" rx="9"/><text x="60" y="24" text-anchor="middle">post-execute</text><text x="60" y="41" text-anchor="middle" class="sub">waterfall — reshape</text>
+    <rect width="120" height="54" rx="4"/><text x="60" y="24" text-anchor="middle">post-execute</text><text x="60" y="41" text-anchor="middle" class="sub">waterfall — reshape</text>
   </g>
   <path class="dg-edge" d="M632 137 L662 137" marker-end="url(#ah9)"/>
   <g class="dg-node n-core" transform="translate(666,110)" data-dg-title="tools/result + append" data-dg-body="#t9-result" data-dg-src="packages/core/tools/src/index.ts:198|tools/result">
-    <rect width="80" height="54" rx="9"/><text x="40" y="24" text-anchor="middle">result</text><text x="40" y="41" text-anchor="middle" class="sub">→ tool/result</text>
+    <rect width="80" height="54" rx="4"/><text x="40" y="24" text-anchor="middle">result</text><text x="40" y="41" text-anchor="middle" class="sub">→ tool/result</text>
   </g>
   <text class="dg-label" x="388" y="80" text-anchor="middle">every stage is a waterfall — a hook can veto, transform, or wrap the call</text>
   <text class="dg-label" x="388" y="200" text-anchor="middle">approval gates live in pre-execute · timeouts wrap execute · redaction/content-projection lives in post-execute</text>
   <text class="dg-label" x="388" y="220" text-anchor="middle">tools/result is an emit — the committed, frozen outcome every observer sees</text>
 </svg>
-<figcaption>One call = pre-execute → execute → post-execute → a durable tool/result. Each waterfall
+<figcaption>One call = pre-execute <i class="ph ph-arrow-right"></i> execute <i class="ph ph-arrow-right"></i> post-execute <i class="ph ph-arrow-right"></i> a durable tool/result. Each waterfall
 is a place a policy plugin can intervene — approvals, timeouts, sandboxing, redaction.</figcaption>
 </figure>
 

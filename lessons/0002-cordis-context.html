@@ -87,13 +87,13 @@ with it. Nothing to clean up by hand — lesson 3 goes deep on this.</p>
 <svg viewBox="0 0 740 300">
   <defs><marker id="ah2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
   <g class="dg-node n-core" transform="translate(40,40)" data-dg-title="A provider plugin" data-dg-body="#t2-provider" data-dg-src="packages/core/session/src/index.ts:925|SessionStore">
-    <rect width="170" height="50" rx="9"/><text x="85" y="22" text-anchor="middle">plugin A</text><text x="85" y="38" text-anchor="middle" class="sub">class SessionStore</text>
+    <rect width="170" height="50" rx="4"/><text x="85" y="22" text-anchor="middle">plugin A</text><text x="85" y="38" text-anchor="middle" class="sub">class SessionStore</text>
   </g>
   <g class="dg-node n-cordis" transform="translate(300,40)" data-dg-title="ctx.reflect — the service store" data-dg-body="#t2-reflect" data-dg-src="vendor/cordis/src/reflect.ts|ReflectService">
-    <rect width="170" height="50" rx="9"/><text x="85" y="22" text-anchor="middle">reflect store</text><text x="85" y="38" text-anchor="middle" class="sub">name → impl (by realm key)</text>
+    <rect width="170" height="50" rx="4"/><text x="85" y="22" text-anchor="middle">reflect store</text><text x="85" y="38" text-anchor="middle" class="sub">name → impl (by realm key)</text>
   </g>
   <g class="dg-node n-tool" transform="translate(560,40)" data-dg-title="A consumer plugin" data-dg-body="#t2-consumer" data-dg-src="packages/core/agent-loop/src/index.ts|dsh-agent-loop">
-    <rect width="150" height="50" rx="9"/><text x="75" y="22" text-anchor="middle">plugin B</text><text x="75" y="38" text-anchor="middle" class="sub">reads ctx.sessions</text>
+    <rect width="150" height="50" rx="4"/><text x="75" y="22" text-anchor="middle">plugin B</text><text x="75" y="38" text-anchor="middle" class="sub">reads ctx.sessions</text>
   </g>
   <path class="dg-edge" d="M210 65 L296 65" marker-end="url(#ah2)"/>
   <text class="dg-label" x="253" y="56" text-anchor="middle">provide('sessions')</text>
@@ -101,18 +101,18 @@ with it. Nothing to clean up by hand — lesson 3 goes deep on this.</p>
   <text class="dg-label" x="518" y="56" text-anchor="middle">ctx.sessions</text>
 
   <g class="dg-node n-cordis" transform="translate(300,140)" data-dg-title="The ctx proxy" data-dg-body="#t2-proxy" data-dg-src="vendor/cordis/src/context.ts:42-84|class Context">
-    <rect width="170" height="44" rx="9"/><text x="85" y="27" text-anchor="middle">ctx (Proxy)</text>
+    <rect width="170" height="44" rx="4"/><text x="85" y="27" text-anchor="middle">ctx (Proxy)</text>
   </g>
   <path class="dg-edge dash" d="M385 90 L385 138"/>
   <text class="dg-label" x="396" y="118">read ctx.* → lookup</text>
 
   <g class="dg-node n-event" transform="translate(60,210)" data-dg-title="internal/service &amp; internal/get" data-dg-body="#t2-internal">
-    <rect width="280" height="60" rx="9"/><text x="140" y="24" text-anchor="middle">every provide / read is an internal event</text><text x="140" y="44" text-anchor="middle" class="sub">plugins can observe or intercept even the directory itself</text>
+    <rect width="280" height="60" rx="4"/><text x="140" y="24" text-anchor="middle">every provide / read is an internal event</text><text x="140" y="44" text-anchor="middle" class="sub">plugins can observe or intercept even the directory itself</text>
   </g>
   <path class="dg-edge dash" d="M300 162 L340 200"/>
   <text class="dg-label" x="430" y="240">the directory itself is extensible — that's the whole trick</text>
 </svg>
-<figcaption>Provider → store → proxy → consumer. Nobody imports anybody; names are the contract.</figcaption>
+<figcaption>Provider <i class="ph ph-arrow-right"></i> store <i class="ph ph-arrow-right"></i> proxy <i class="ph ph-arrow-right"></i> consumer. Nobody imports anybody; names are the contract.</figcaption>
 </figure>
 
 <h2>Three ways plugins consume a service</h2>
@@ -154,15 +154,15 @@ creates a child that prototypally inherits the parent but owns extra keys:</p>
 <figure class="diagram">
 <svg viewBox="0 0 720 210">
   <g class="dg-node n-cordis" transform="translate(270,16)" data-dg-title="Root context" data-dg-body="#t2-root">
-    <rect width="180" height="42" rx="9"/><text x="90" y="26" text-anchor="middle">root ctx</text>
+    <rect width="180" height="42" rx="4"/><text x="90" y="26" text-anchor="middle">root ctx</text>
   </g>
   <path class="dg-edge" d="M320 58 L210 96"/>
   <path class="dg-edge" d="M420 58 L510 96"/>
   <g class="dg-node n-cordis" transform="translate(120,100)" data-dg-title="ctx.extend({...})" data-dg-body="#t2-extend" data-dg-src="vendor/cordis/src/context.ts:99-107|extend()">
-    <rect width="190" height="46" rx="9"/><text x="95" y="20" text-anchor="middle">child A: fiber's ctx</text><text x="95" y="36" text-anchor="middle" class="sub">inherits + own keys (e.g. fiber)</text>
+    <rect width="190" height="46" rx="4"/><text x="95" y="20" text-anchor="middle">child A: fiber's ctx</text><text x="95" y="36" text-anchor="middle" class="sub">inherits + own keys (e.g. fiber)</text>
   </g>
   <g class="dg-node n-core" transform="translate(420,100)" data-dg-title="ctx.isolate('compaction')" data-dg-body="#t2-isolate" data-dg-src="vendor/cordis/src/context.ts:121-125|isolate()">
-    <rect width="210" height="46" rx="9"/><text x="105" y="20" text-anchor="middle">child B: isolated realm</text><text x="105" y="36" text-anchor="middle" class="sub">ctx.compaction resolves elsewhere</text>
+    <rect width="210" height="46" rx="4"/><text x="105" y="20" text-anchor="middle">child B: isolated realm</text><text x="105" y="36" text-anchor="middle" class="sub">ctx.compaction resolves elsewhere</text>
   </g>
   <path class="dg-edge dash" d="M515 146 L515 168"/>
   <text class="dg-label" x="515" y="188" text-anchor="middle">two agents, two realms, one process — lesson 11</text>
@@ -234,7 +234,7 @@ Questions? Ask me.</p>
 </main>
 
 <template id="t2-provider"><p>A <code>Service</code> subclass registers itself in its constructor:
-<code>super(ctx, 'sessions')</code> → <code>ctx.reflect.provide('sessions', this)</code>. The provide
+<code>super(ctx, 'sessions')</code> <i class="ph ph-arrow-right"></i> <code>ctx.reflect.provide('sessions', this)</code>. The provide
 is an owned effect — it disappears when the fiber unloads.</p></template>
 <template id="t2-reflect"><p>The reflect layer keeps <code>realm-symbol → { fiber, impl }</code>.
 The realm symbol (not the name string) is what a lookup resolves, which is what makes

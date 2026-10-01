@@ -99,7 +99,7 @@
       var tpl = document.getElementById(bodyRef.slice(1));
       bodyHost.innerHTML = tpl ? tpl.innerHTML : '<p class="muted">(no detail)</p>';
     } else {
-      bodyHost.innerHTML = bodyRef;
+      bodyHost.innerHTML = bodyRef.replace(/→/g, '<i class="ph ph-arrow-right"></i>');
     }
     var srcs = panel.querySelector('.srcs');
     srcs.innerHTML = '';

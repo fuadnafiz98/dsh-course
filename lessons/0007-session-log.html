@@ -48,32 +48,32 @@ key idea:</p>
 <svg viewBox="0 0 760 420">
   <defs><marker id="ah7" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
 
-  <rect class="dg-layer" x="10" y="10" width="360" height="360" rx="12"/>
+  <rect class="dg-layer" x="10" y="10" width="360" height="360" rx="6"/>
   <text class="dg-layer-label" x="24" y="30">The log — append-only source of truth</text>
-  <g class="dg-node n-event" transform="translate(40,50)"  data-dg-title="Lifecycle" data-dg-body="#t7-lifecycle"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">turn/start · turn/end · step/start · step/end</text></g>
-  <g class="dg-node n-event" transform="translate(40,88)"  data-dg-title="Request bookkeeping" data-dg-body="#t7-book"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">request/header · request/context</text></g>
-  <g class="dg-node n-event" transform="translate(40,126)" data-dg-title="Tool calls" data-dg-body="#t7-toolcall"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">tool/call — the model asked</text></g>
-  <g class="dg-node n-event" transform="translate(40,164)" data-dg-title="assistant/attempt" data-dg-body="#t7-attempt"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">assistant/attempt — a failed try, logged</text></g>
-  <g class="dg-node n-event" transform="translate(40,202)" data-dg-title="session/end-seed" data-dg-body="#t7-seed"><rect width="300" height="30" rx="7"/><text x="150" y="20" text-anchor="middle">session/end-seed — fork/restore boundary</text></g>
+  <g class="dg-node n-event" transform="translate(40,50)"  data-dg-title="Lifecycle" data-dg-body="#t7-lifecycle"><rect width="300" height="30" rx="4"/><text x="150" y="20" text-anchor="middle">turn/start · turn/end · step/start · step/end</text></g>
+  <g class="dg-node n-event" transform="translate(40,88)"  data-dg-title="Request bookkeeping" data-dg-body="#t7-book"><rect width="300" height="30" rx="4"/><text x="150" y="20" text-anchor="middle">request/header · request/context</text></g>
+  <g class="dg-node n-event" transform="translate(40,126)" data-dg-title="Tool calls" data-dg-body="#t7-toolcall"><rect width="300" height="30" rx="4"/><text x="150" y="20" text-anchor="middle">tool/call — the model asked</text></g>
+  <g class="dg-node n-event" transform="translate(40,164)" data-dg-title="assistant/attempt" data-dg-body="#t7-attempt"><rect width="300" height="30" rx="4"/><text x="150" y="20" text-anchor="middle">assistant/attempt — a failed try, logged</text></g>
+  <g class="dg-node n-event" transform="translate(40,202)" data-dg-title="session/end-seed" data-dg-body="#t7-seed"><rect width="300" height="30" rx="4"/><text x="150" y="20" text-anchor="middle">session/end-seed — fork/restore boundary</text></g>
   <g class="dg-node n-core" transform="translate(40,240)" data-dg-title="The five surface events" data-dg-body="#t5ev" data-dg-src="packages/core/session/src/types.ts:439-445|SurfaceEventType">
-    <rect width="300" height="110" rx="9"/><text x="150" y="24" text-anchor="middle">message-producing events</text><text x="150" y="46" text-anchor="middle" class="sub">system/message · developer/message</text><text x="150" y="63" text-anchor="middle" class="sub">user/message · assistant/message</text><text x="150" y="80" text-anchor="middle" class="sub">tool/result</text>
+    <rect width="300" height="110" rx="4"/><text x="150" y="24" text-anchor="middle">message-producing events</text><text x="150" y="46" text-anchor="middle" class="sub">system/message · developer/message</text><text x="150" y="63" text-anchor="middle" class="sub">user/message · assistant/message</text><text x="150" y="80" text-anchor="middle" class="sub">tool/result</text>
   </g>
   <text class="dg-label" x="190" y="365" text-anchor="middle">every event is lossless JSON · seqs are contiguous</text>
 
   <path class="dg-edge" d="M370 240 L410 240" marker-end="url(#ah7)"/>
   <text class="dg-label" x="390" y="228" text-anchor="middle" transform="rotate(0)">project</text>
 
-  <rect class="dg-layer" x="410" y="10" width="340" height="360" rx="12"/>
+  <rect class="dg-layer" x="410" y="10" width="340" height="360" rx="6"/>
   <text class="dg-layer-label" x="424" y="30">The surface — model-visible view</text>
-  <g class="dg-node n-core" transform="translate(440,50)" data-dg-title="surface node 0" data-dg-body="#t7-node0"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">node 0 · system/message</text></g>
-  <g class="dg-node n-core" transform="translate(440,92)" data-dg-title="user turns" data-dg-body="#t7-user"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">user/message × N</text></g>
-  <g class="dg-node n-core" transform="translate(440,134)" data-dg-title="assistant turns" data-dg-body="#t7-asst"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">assistant/message × N</text></g>
-  <g class="dg-node n-core" transform="translate(440,176)" data-dg-title="tool results" data-dg-body="#t7-toolres"><rect width="280" height="34" rx="7"/><text x="140" y="21" text-anchor="middle">tool/result × N</text></g>
+  <g class="dg-node n-core" transform="translate(440,50)" data-dg-title="surface node 0" data-dg-body="#t7-node0"><rect width="280" height="34" rx="4"/><text x="140" y="21" text-anchor="middle">node 0 · system/message</text></g>
+  <g class="dg-node n-core" transform="translate(440,92)" data-dg-title="user turns" data-dg-body="#t7-user"><rect width="280" height="34" rx="4"/><text x="140" y="21" text-anchor="middle">user/message × N</text></g>
+  <g class="dg-node n-core" transform="translate(440,134)" data-dg-title="assistant turns" data-dg-body="#t7-asst"><rect width="280" height="34" rx="4"/><text x="140" y="21" text-anchor="middle">assistant/message × N</text></g>
+  <g class="dg-node n-core" transform="translate(440,176)" data-dg-title="tool results" data-dg-body="#t7-toolres"><rect width="280" height="34" rx="4"/><text x="140" y="21" text-anchor="middle">tool/result × N</text></g>
   <text class="dg-label" x="580" y="240" text-anchor="middle">ordered seq list — the model's context</text>
   <text class="dg-label" x="580" y="260" text-anchor="middle">a compaction replaces a span of nodes</text>
   <text class="dg-label" x="580" y="280" text-anchor="middle">with a synthesized summary node</text>
   <g class="dg-node n-cordis" transform="translate(440,310)" data-dg-title="deriveMessages" data-dg-body="#t7-derive" data-dg-src="packages/core/session/src/surface.ts|surface.ts">
-    <rect width="280" height="40" rx="9"/><text x="140" y="25" text-anchor="middle">deriveMessages(log) → the request payload</text>
+    <rect width="280" height="40" rx="4"/><text x="140" y="25" text-anchor="middle">deriveMessages(log) → the request payload</text>
   </g>
 </svg>
 <figcaption>The log is the truth; the surface is a derived, ordered subset of message-producing

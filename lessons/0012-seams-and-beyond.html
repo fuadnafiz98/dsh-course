@@ -44,15 +44,15 @@ three sibling packages: <code>dsh-&lt;thing&gt;</code> (definition), <code>dsh-&
 <figure class="diagram">
 <svg viewBox="0 0 760 300">
   <defs><marker id="ah12" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
-  <g class="dg-node n-cordis" transform="translate(40,120)" data-dg-title="Consumer" data-dg-body="#t12-cons"><rect width="160" height="56" rx="9"/><text x="80" y="24" text-anchor="middle">CONSUMER</text><text x="80" y="41" text-anchor="middle" class="sub">dsh-tool-bash (the tool)</text></g>
+  <g class="dg-node n-cordis" transform="translate(40,120)" data-dg-title="Consumer" data-dg-body="#t12-cons"><rect width="160" height="56" rx="4"/><text x="80" y="24" text-anchor="middle">CONSUMER</text><text x="80" y="41" text-anchor="middle" class="sub">dsh-tool-bash (the tool)</text></g>
   <path class="dg-edge" d="M200 148 L250 148" marker-end="url(#ah12)"/>
   <text class="dg-label" x="225" y="138" text-anchor="middle">ctx.shell</text>
-  <g class="dg-node n-core" transform="translate(254,120)" data-dg-title="Definition" data-dg-body="#t12-def"><rect width="170" height="56" rx="9"/><text x="85" y="24" text-anchor="middle">DEFINITION</text><text x="85" y="41" text-anchor="middle" class="sub">dsh-shell (ctx.shell contract)</text></g>
+  <g class="dg-node n-core" transform="translate(254,120)" data-dg-title="Definition" data-dg-body="#t12-def"><rect width="170" height="56" rx="4"/><text x="85" y="24" text-anchor="middle">DEFINITION</text><text x="85" y="41" text-anchor="middle" class="sub">dsh-shell (ctx.shell contract)</text></g>
   <path class="dg-edge" d="M424 148 L474 148" marker-end="url(#ah12)"/>
   <text class="dg-label" x="449" y="138" text-anchor="middle">provided by</text>
-  <g class="dg-node n-tool" transform="translate(478,60)" data-dg-title="local provider" data-dg-body="#t12-local"><rect width="240" height="44" rx="9"/><text x="120" y="27" text-anchor="middle">dsh-bash-local</text></g>
-  <g class="dg-node n-tool" transform="translate(478,116)" data-dg-title="sandbox provider" data-dg-body="#t12-sand"><rect width="240" height="44" rx="9"/><text x="120" y="27" text-anchor="middle">dsh-bash-sandbox</text></g>
-  <g class="dg-node n-tool" transform="translate(478,172)" data-dg-title="ssh provider" data-dg-body="#t12-ssh"><rect width="240" height="44" rx="9"/><text x="120" y="27" text-anchor="middle">dsh-bash-ssh / remote</text></g>
+  <g class="dg-node n-tool" transform="translate(478,60)" data-dg-title="local provider" data-dg-body="#t12-local"><rect width="240" height="44" rx="4"/><text x="120" y="27" text-anchor="middle">dsh-bash-local</text></g>
+  <g class="dg-node n-tool" transform="translate(478,116)" data-dg-title="sandbox provider" data-dg-body="#t12-sand"><rect width="240" height="44" rx="4"/><text x="120" y="27" text-anchor="middle">dsh-bash-sandbox</text></g>
+  <g class="dg-node n-tool" transform="translate(478,172)" data-dg-title="ssh provider" data-dg-body="#t12-ssh"><rect width="240" height="44" rx="4"/><text x="120" y="27" text-anchor="middle">dsh-bash-ssh / remote</text></g>
   <text class="dg-label" x="598" y="245" text-anchor="middle">swap the provider → the tool</text>
   <text class="dg-label" x="598" y="262" text-anchor="middle">runs elsewhere unchanged</text>
 </svg>
@@ -73,7 +73,7 @@ consumer tool, one contract, many providers.</figcaption>
   <tr><td><code>terminal</code></td><td><a class="code" data-src="packages/terminal">dsh-terminal</a></td><td>persistent PTY providers</td><td><code>dsh-tool-terminal</code></td></tr>
   <tr><td><code>lsp</code></td><td><a class="code" data-src="packages/lsp">dsh-lsp</a></td><td>per-language server providers</td><td><code>dsh-tool-lsp</code></td></tr>
   <tr><td><code>sessionPersistence</code></td><td><a class="code" data-src="packages/session">dsh-session-persistence</a></td><td>JSONL backend</td><td>the session store</td></tr>
-  <tr><td><code>mcp</code></td><td><a class="code" data-src="packages/mcp">dsh-mcp</a></td><td>MCP server connections</td><td>tool bridge → ctx.tools</td></tr>
+  <tr><td><code>mcp</code></td><td><a class="code" data-src="packages/mcp">dsh-mcp</a></td><td>MCP server connections</td><td>tool bridge <i class="ph ph-arrow-right"></i> ctx.tools</td></tr>
   <tr><td><code>skills</code></td><td><a class="code" data-src="packages/skill">dsh-skill</a></td><td>filesystem skill loader</td><td>prompt injection</td></tr>
   <tr><td><code>storage</code></td><td><a class="code" data-src="packages/storage">dsh-storage</a></td><td>local kv/disk providers</td><td>settings, jobs, identity</td></tr>
 </table>
@@ -102,8 +102,8 @@ consumer tool, one contract, many providers.</figcaption>
 
 <div class="callout key">
   <span class="tag">You now hold the map</span>
-  <p>Framework (Cordis) → composition (profiles/patches) → core spine (session, loop, tools, prompt,
-  llm) → capability seams → surfaces. Every file you've seen slots into exactly one of those layers,
+  <p>Framework (Cordis) <i class="ph ph-arrow-right"></i> composition (profiles/patches) <i class="ph ph-arrow-right"></i> core spine (session, loop, tools, prompt,
+  llm) <i class="ph ph-arrow-right"></i> capability seams <i class="ph ph-arrow-right"></i> surfaces. Every file you've seen slots into exactly one of those layers,
   and every feature is a plugin registering on a seam or a waterfall. That's the whole codebase's
   shape.</p>
 </div>
@@ -130,9 +130,9 @@ fiber. Each is a self-contained seam you now have the vocabulary to read.</p>
 <div class="quiz">
   <p class="q"><span class="tag">Retrieval</span> The capability-seam triple is…</p>
   <div class="opts">
-    <button>define → mock → test</button>
-    <button data-ok>Definition (ctx.* contract) → Provider (registers impl) → Consumer (uses it)</button>
-    <button>input → process → output</button>
+    <button>define <i class="ph ph-arrow-right"></i> mock <i class="ph ph-arrow-right"></i> test</button>
+    <button data-ok>Definition (ctx.* contract) <i class="ph ph-arrow-right"></i> Provider (registers impl) <i class="ph ph-arrow-right"></i> Consumer (uses it)</button>
+    <button>input <i class="ph ph-arrow-right"></i> process <i class="ph ph-arrow-right"></i> output</button>
   </div>
   <p class="why">Definition/Provider/Consumer — and a seam is only complete when all three exist.
   It's the unit of swappability across the whole repo.</p>

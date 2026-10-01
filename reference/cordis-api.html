@@ -25,7 +25,7 @@ operations, you can read any plugin in the repo. Each links to the implementing 
 <tr><td><code>ctx.isolate(name, key?)</code></td><td>Child where service <code>name</code> resolves in a fresh realm — same name, different impl.</td></tr>
 <tr><td><code>ctx.intercept(name, config)</code></td><td>Merge config into every plugin under the child that uses service <code>name</code>.</td></tr>
 <tr><td><code>ctx.mixin(name, entries)</code></td><td>Provide derived properties on the context.</td></tr>
-<tr><td><code>ctx.&lt;name&gt;</code></td><td>Proxy read → resolve the service (throws if absent unless injected).</td></tr>
+<tr><td><code>ctx.&lt;name&gt;</code></td><td>Proxy read <i class="ph ph-arrow-right"></i> resolve the service (throws if absent unless injected).</td></tr>
 <tr><td><code>ctx.get(name)</code></td><td>Strict read of the global store; <code>undefined</code> if absent — for optional deps.</td></tr>
 <tr><td><code>ctx.provide(name, impl)</code></td><td>Register an impl under a name — an owned effect (undone on unload).</td></tr>
 <tr><td><code>ctx.fiber</code></td><td>The current fiber (set on the plugin's child context).</td></tr>
@@ -34,12 +34,12 @@ operations, you can read any plugin in the repo. Each links to the implementing 
 <h2>Plugins &amp; fibers — <a class="code" data-src="vendor/cordis/src/fiber.ts">fiber.ts</a> · <a class="code" data-src="vendor/cordis/src/registry.ts">registry.ts</a></h2>
 <table class="cat">
 <tr><th>API / field</th><th>What it does</th></tr>
-<tr><td><code>ctx.plugin(plugin, config?)</code></td><td>Mount a plugin → create a fiber. Accepts fn / {apply} / class.</td></tr>
+<tr><td><code>ctx.plugin(plugin, config?)</code></td><td>Mount a plugin <i class="ph ph-arrow-right"></i> create a fiber. Accepts fn / {apply} / class.</td></tr>
 <tr><td><code>ctx.inject(deps, cb)</code></td><td>Run cb in a child ctx once all deps exist; re-runs if a dep is replaced.</td></tr>
 <tr><td><code>static inject / inject</code></td><td>Plugin's declared deps: <code>['a']</code> or <code>{required:[], optional:[]}</code>.</td></tr>
 <tr><td><code>ctx.effect(fn)</code></td><td>Run fn now; record its disposer on the fiber; runs in reverse on unload.</td></tr>
 <tr><td><code>ctx.fork(config?)</code></td><td>Mount a sub-plugin under the current fiber.</td></tr>
-<tr><td><code>fiber.state</code></td><td>PENDING → LOADING → ACTIVE | FAILED | UNLOADING → DISPOSED.</td></tr>
+<tr><td><code>fiber.state</code></td><td>PENDING <i class="ph ph-arrow-right"></i> LOADING <i class="ph ph-arrow-right"></i> ACTIVE | FAILED | UNLOADING <i class="ph ph-arrow-right"></i> DISPOSED.</td></tr>
 <tr><td><code>fiber.dispose()</code></td><td>Unmount the plugin: unwind effects in reverse, unprovide services.</td></tr>
 <tr><td><code>Fiber.update()</code></td><td>Re-evaluate deps/config — wait more, reuse, or restart the fiber.</td></tr>
 </table>

@@ -42,137 +42,137 @@ a detail panel. Start from Lesson 1 if you're new; jump anywhere if you're not.<
 <figure class="diagram">
 <svg viewBox="0 0 1040 640" role="img" aria-label="Layered architecture map of DeepSeek Harness">
   <!-- ══ surfaces ══ -->
-  <rect class="dg-layer" x="10" y="10" width="1020" height="96" rx="12"/>
+  <rect class="dg-layer" x="10" y="10" width="1020" height="96" rx="6"/>
   <text class="dg-layer-label" x="24" y="30">Surfaces — ways to launch (packages/bundle/, apps/)</text>
   <g class="dg-node n-surface" transform="translate(40,44)" data-dg-title="dsh web — browser app"
      data-dg-body="#tpl-web" data-dg-src="packages/bundle/web-app/cordis.patch.yml|web-app bundle patch;;apps/web|apps/web frontend">
-    <rect width="160" height="46" rx="8"/><text x="80" y="20" text-anchor="middle">web</text><text x="80" y="35" text-anchor="middle" class="sub">browser UI :3080</text>
+    <rect width="160" height="46" rx="4"/><text x="80" y="20" text-anchor="middle">web</text><text x="80" y="35" text-anchor="middle" class="sub">browser UI :3080</text>
   </g>
   <g class="dg-node n-surface" transform="translate(230,44)" data-dg-title="dsh headless — one-shot runner"
      data-dg-body="#tpl-headless" data-dg-src="packages/bundle/headless/cordis.patch.yml|headless bundle patch">
-    <rect width="160" height="46" rx="8"/><text x="80" y="20" text-anchor="middle">headless</text><text x="80" y="35" text-anchor="middle" class="sub">dsh "task" → done</text>
+    <rect width="160" height="46" rx="4"/><text x="80" y="20" text-anchor="middle">headless</text><text x="80" y="35" text-anchor="middle" class="sub">dsh "task" → done</text>
   </g>
   <g class="dg-node n-surface" transform="translate(420,44)" data-dg-title="dsh sdk — JSON-RPC server"
      data-dg-body="#tpl-sdk" data-dg-src="packages/bundle/sdk-app/cordis.patch.yml|sdk-app bundle patch;;packages/sdk|packages/sdk">
-    <rect width="160" height="46" rx="8"/><text x="80" y="20" text-anchor="middle">sdk / sdk-minimal</text><text x="80" y="35" text-anchor="middle" class="sub">embed the harness</text>
+    <rect width="160" height="46" rx="4"/><text x="80" y="20" text-anchor="middle">sdk / sdk-minimal</text><text x="80" y="35" text-anchor="middle" class="sub">embed the harness</text>
   </g>
   <g class="dg-node n-surface" transform="translate(610,44)" data-dg-title="dsh acp — editor automation"
      data-dg-body="#tpl-acp" data-dg-src="packages/bundle/acp-app/cordis.patch.yml|acp-app bundle patch;;packages/acp|packages/acp">
-    <rect width="160" height="46" rx="8"/><text x="80" y="20" text-anchor="middle">acp</text><text x="80" y="35" text-anchor="middle" class="sub">Zed-style protocol</text>
+    <rect width="160" height="46" rx="4"/><text x="80" y="20" text-anchor="middle">acp</text><text x="80" y="35" text-anchor="middle" class="sub">Zed-style protocol</text>
   </g>
   <g class="dg-node n-surface" transform="translate(800,44)" data-dg-title="Desktop — Electron shell"
      data-dg-body="#tpl-desktop" data-dg-src="apps/desktop|apps/desktop;;apps/desktop-host|apps/desktop-host">
-    <rect width="160" height="46" rx="8"/><text x="80" y="20" text-anchor="middle">desktop</text><text x="80" y="35" text-anchor="middle" class="sub">Electron + web profile</text>
+    <rect width="160" height="46" rx="4"/><text x="80" y="20" text-anchor="middle">desktop</text><text x="80" y="35" text-anchor="middle" class="sub">Electron + web profile</text>
   </g>
 
   <line class="dg-edge dash" x1="520" y1="106" x2="520" y2="132"/>
 
   <!-- ══ composition ══ -->
-  <rect class="dg-layer" x="10" y="132" width="1020" height="72" rx="12"/>
+  <rect class="dg-layer" x="10" y="132" width="1020" height="72" rx="6"/>
   <text class="dg-layer-label" x="24" y="152">Composition — the tree is assembled from patches, not code</text>
   <g class="dg-node n-cordis" transform="translate(60,160)" data-dg-title="Profiles"
      data-dg-body="#tpl-profiles" data-dg-src="apps/cli/src/profile-boot.ts:167-173|prepareProfile()">
-    <rect width="200" height="34" rx="8"/><text x="100" y="21" text-anchor="middle">profile = ordered bundle list</text>
+    <rect width="200" height="34" rx="4"/><text x="100" y="21" text-anchor="middle">profile = ordered bundle list</text>
   </g>
   <g class="dg-node n-cordis" transform="translate(300,160)" data-dg-title="Bundles"
      data-dg-body="#tpl-bundles" data-dg-src="packages/bundle/base/cordis.patch.yml|dsh-base cordis.patch.yml">
-    <rect width="200" height="34" rx="8"/><text x="100" y="21" text-anchor="middle">bundle = cordis.patch.yml layer</text>
+    <rect width="200" height="34" rx="4"/><text x="100" y="21" text-anchor="middle">bundle = cordis.patch.yml layer</text>
   </g>
   <g class="dg-node n-cordis" transform="translate(540,160)" data-dg-title="Patches"
      data-dg-body="#tpl-patches" data-dg-src="vendor/include/src/index.ts|vendor/include (applyEntryPatches)">
-    <rect width="200" height="34" rx="8"/><text x="100" y="21" text-anchor="middle">patch rows by id, last wins</text>
+    <rect width="200" height="34" rx="4"/><text x="100" y="21" text-anchor="middle">patch rows by id, last wins</text>
   </g>
   <g class="dg-node n-cordis" transform="translate(780,160)" data-dg-title="cordis.yml entry tree"
      data-dg-body="#tpl-entries" data-dg-src="vendor/loader/src/config/entry.ts|Loader Entry">
-    <rect width="220" height="34" rx="8"/><text x="110" y="21" text-anchor="middle">entry → import → inject → fiber</text>
+    <rect width="220" height="34" rx="4"/><text x="110" y="21" text-anchor="middle">entry → import → inject → fiber</text>
   </g>
 
   <line class="dg-edge dash" x1="520" y1="204" x2="520" y2="230"/>
 
   <!-- ══ core spine ══ -->
-  <rect class="dg-layer" x="10" y="230" width="1020" height="120" rx="12"/>
+  <rect class="dg-layer" x="10" y="230" width="1020" height="120" rx="6"/>
   <text class="dg-layer-label" x="24" y="250">Core spine — the product API (packages/core/, mounted by dsh-base)</text>
   <g class="dg-node n-core" transform="translate(40,266)" data-dg-title="ctx.agents — agent registry"
      data-dg-body="#tpl-agents" data-dg-src="packages/core/agent/src/index.ts|dsh-agent AgentRegistry">
-    <rect width="150" height="40" rx="8"/><text x="75" y="24" text-anchor="middle">ctx.agents</text>
+    <rect width="150" height="40" rx="4"/><text x="75" y="24" text-anchor="middle">ctx.agents</text>
   </g>
   <g class="dg-node n-core" transform="translate(210,266)" data-dg-title="ctx.agentLoop — the driver"
      data-dg-body="#tpl-agentloop" data-dg-src="packages/core/agent-loop/src/agent.ts:98|ReactLoopAgent">
-    <rect width="150" height="40" rx="8"/><text x="75" y="24" text-anchor="middle">ctx.agentLoop</text>
+    <rect width="150" height="40" rx="4"/><text x="75" y="24" text-anchor="middle">ctx.agentLoop</text>
   </g>
   <g class="dg-node n-core" transform="translate(380,266)" data-dg-title="ctx.sessions — the session log store"
      data-dg-body="#tpl-sessions" data-dg-src="packages/core/session/src/index.ts:925|SessionStore">
-    <rect width="150" height="40" rx="8"/><text x="75" y="24" text-anchor="middle">ctx.sessions</text>
+    <rect width="150" height="40" rx="4"/><text x="75" y="24" text-anchor="middle">ctx.sessions</text>
   </g>
   <g class="dg-node n-core" transform="translate(550,266)" data-dg-title="ctx.systemPrompt — prompt assembly"
      data-dg-body="#tpl-sysprompt" data-dg-src="packages/core/system-prompt/src/index.ts:405|SystemPrompt service">
-    <rect width="160" height="40" rx="8"/><text x="80" y="24" text-anchor="middle">ctx.systemPrompt</text>
+    <rect width="160" height="40" rx="4"/><text x="80" y="24" text-anchor="middle">ctx.systemPrompt</text>
   </g>
   <g class="dg-node n-core" transform="translate(730,266)" data-dg-title="ctx.tools — tool registry + pipeline"
      data-dg-body="#tpl-tools" data-dg-src="packages/core/tools/src/index.ts:807|ToolRuntime">
-    <rect width="130" height="40" rx="8"/><text x="65" y="24" text-anchor="middle">ctx.tools</text>
+    <rect width="130" height="40" rx="4"/><text x="65" y="24" text-anchor="middle">ctx.tools</text>
   </g>
   <g class="dg-node n-core" transform="translate(880,266)" data-dg-title="ctx.llm — model adapter registry"
      data-dg-body="#tpl-llm" data-dg-src="packages/llm/llm/src/index.ts:342|LlmRuntime">
-    <rect width="130" height="40" rx="8"/><text x="65" y="24" text-anchor="middle">ctx.llm</text>
+    <rect width="130" height="40" rx="4"/><text x="65" y="24" text-anchor="middle">ctx.llm</text>
   </g>
   <text class="dg-label" x="520" y="330" text-anchor="middle">turn → step → request → stream → tools → session events (lesson 8 walks this top to bottom)</text>
 
   <line class="dg-edge dash" x1="520" y1="350" x2="520" y2="376"/>
 
   <!-- ══ capability seams ══ -->
-  <rect class="dg-layer" x="10" y="376" width="1020" height="110" rx="12"/>
+  <rect class="dg-layer" x="10" y="376" width="1020" height="110" rx="6"/>
   <text class="dg-layer-label" x="24" y="396">Capability seams — definition / provider / consumer triples (packages/&lt;group&gt;/)</text>
   <g class="dg-node n-tool" transform="translate(60,412)" data-dg-title="ctx.shell — command execution"
      data-dg-body="#tpl-shell" data-dg-src="packages/shell|packages/shell/">
-    <rect width="140" height="34" rx="8"/><text x="70" y="21" text-anchor="middle">shell / subprocess</text>
+    <rect width="140" height="34" rx="4"/><text x="70" y="21" text-anchor="middle">shell / subprocess</text>
   </g>
   <g class="dg-node n-tool" transform="translate(230,412)" data-dg-title="ctx.fs — filesystem"
      data-dg-body="#tpl-fs" data-dg-src="packages/fs|packages/fs/">
-    <rect width="140" height="34" rx="8"/><text x="70" y="21" text-anchor="middle">fs</text>
+    <rect width="140" height="34" rx="4"/><text x="70" y="21" text-anchor="middle">fs</text>
   </g>
   <g class="dg-node n-tool" transform="translate(400,412)" data-dg-title="ctx.subagents — delegation"
      data-dg-body="#tpl-subagents" data-dg-src="packages/subagent|packages/subagent/">
-    <rect width="140" height="34" rx="8"/><text x="70" y="21" text-anchor="middle">subagents</text>
+    <rect width="140" height="34" rx="4"/><text x="70" y="21" text-anchor="middle">subagents</text>
   </g>
   <g class="dg-node n-tool" transform="translate(570,412)" data-dg-title="ctx.sandbox — confinement"
      data-dg-body="#tpl-sandbox" data-dg-src="packages/sandbox|packages/sandbox/">
-    <rect width="140" height="34" rx="8"/><text x="70" y="21" text-anchor="middle">sandbox</text>
+    <rect width="140" height="34" rx="4"/><text x="70" y="21" text-anchor="middle">sandbox</text>
   </g>
   <g class="dg-node n-tool" transform="translate(740,412)" data-dg-title="ctx.jobs — background jobs"
      data-dg-body="#tpl-jobs" data-dg-src="packages/jobs|packages/jobs/">
-    <rect width="140" height="34" rx="8"/><text x="70" y="21" text-anchor="middle">jobs</text>
+    <rect width="140" height="34" rx="4"/><text x="70" y="21" text-anchor="middle">jobs</text>
   </g>
   <g class="dg-node n-tool" transform="translate(910,412)" data-dg-title="ctx.web — search &amp; fetch"
      data-dg-body="#tpl-web-seam" data-dg-src="packages/web|packages/web/">
-    <rect width="110" height="34" rx="8"/><text x="55" y="21" text-anchor="middle">web</text>
+    <rect width="110" height="34" rx="4"/><text x="55" y="21" text-anchor="middle">web</text>
   </g>
   <text class="dg-label" x="520" y="468" text-anchor="middle">+ skills · mcp · lsp · terminal · credentials · settings · storage · session persistence · compaction … (see the source map)</text>
 
   <line class="dg-edge dash" x1="520" y1="486" x2="520" y2="512"/>
 
   <!-- ══ cordis ══ -->
-  <rect class="dg-layer" x="10" y="512" width="1020" height="112" rx="12" style="stroke: var(--dg-cordis)"/>
+  <rect class="dg-layer" x="10" y="512" width="1020" height="112" rx="6" style="stroke: var(--dg-cordis)"/>
   <text class="dg-layer-label" x="24" y="532" style="fill: var(--dg-cordis)">Cordis — the vendored plugin framework (vendor/cordis + friends)</text>
   <g class="dg-node n-cordis" transform="translate(60,548)" data-dg-title="Context — the shared service world"
      data-dg-body="#tpl-context" data-dg-src="vendor/cordis/src/context.ts:42|class Context">
-    <rect width="150" height="36" rx="8"/><text x="75" y="22" text-anchor="middle">Context (ctx)</text>
+    <rect width="150" height="36" rx="4"/><text x="75" y="22" text-anchor="middle">Context (ctx)</text>
   </g>
   <g class="dg-node n-cordis" transform="translate(240,548)" data-dg-title="Fiber — one plugin's lifecycle"
      data-dg-body="#tpl-fiber" data-dg-src="vendor/cordis/src/fiber.ts:184|class Fiber">
-    <rect width="150" height="36" rx="8"/><text x="75" y="22" text-anchor="middle">Fiber</text>
+    <rect width="150" height="36" rx="4"/><text x="75" y="22" text-anchor="middle">Fiber</text>
   </g>
   <g class="dg-node n-cordis" transform="translate(420,548)" data-dg-title="Events — five dispatch modes"
      data-dg-body="#tpl-events" data-dg-src="vendor/cordis/src/events.ts:131|EventsService">
-    <rect width="150" height="36" rx="8"/><text x="75" y="22" text-anchor="middle">Events</text>
+    <rect width="150" height="36" rx="4"/><text x="75" y="22" text-anchor="middle">Events</text>
   </g>
   <g class="dg-node n-cordis" transform="translate(600,548)" data-dg-title="Loader + Include — mount cordis.yml"
      data-dg-body="#tpl-loader" data-dg-src="vendor/loader/src/index.ts|Loader;;vendor/include/src/index.ts|Include">
-    <rect width="160" height="36" rx="8"/><text x="80" y="22" text-anchor="middle">Loader / Include</text>
+    <rect width="160" height="36" rx="4"/><text x="80" y="22" text-anchor="middle">Loader / Include</text>
   </g>
   <g class="dg-node n-cordis" transform="translate(790,548)" data-dg-title="Service — the ctx.&lt;key&gt; contract"
      data-dg-body="#tpl-service" data-dg-src="vendor/cordis/src/service.ts:11|class Service">
-    <rect width="150" height="36" rx="8"/><text x="75" y="22" text-anchor="middle">Service</text>
+    <rect width="150" height="36" rx="4"/><text x="75" y="22" text-anchor="middle">Service</text>
   </g>
 </svg>
 <figcaption>Five layers, bottom to top: Cordis provides the runtime; seams provide swappable capabilities; the core spine drives sessions; composition decides which rows exist; a surface is just a bundle choice. <b>Click any node.</b></figcaption>
@@ -201,7 +201,7 @@ quick retrieval quiz at the end of each. Advanced material hides inside "Go deep
   <a class="card" data-lesson="3" href="lessons/0003-plugins-fibers-effects.html">
     <span class="done-mark"><i class="ph ph-check"></i></span><span class="num"><i class="ph ph-puzzle-piece"></i> Lesson 03 · cordis</span>
     <h3>Plugins, fibers &amp; effects</h3>
-    <p>Three plugin shapes, the PENDING→ACTIVE lifecycle, <code>inject</code> as the load-order mechanism, and why every registration must be reversible.</p>
+    <p>Three plugin shapes, the PENDING<i class="ph ph-arrow-right"></i>ACTIVE lifecycle, <code>inject</code> as the load-order mechanism, and why every registration must be reversible.</p>
   </a>
   <a class="card" data-lesson="4" href="lessons/0004-events.html">
     <span class="done-mark"><i class="ph ph-check"></i></span><span class="num"><i class="ph ph-puzzle-piece"></i> Lesson 04 · cordis</span>
@@ -231,7 +231,7 @@ quick retrieval quiz at the end of each. Advanced material hides inside "Go deep
   <a class="card" data-lesson="9" href="lessons/0009-tools-pipeline.html">
     <span class="done-mark"><i class="ph ph-check"></i></span><span class="num"><i class="ph ph-gear-six"></i> Lesson 09 · core</span>
     <h3>The tool pipeline</h3>
-    <p>How a tool is defined, registered, guarded, executed, and rendered — pre-execute → execute → post-execute, parallel pools, and presentation views.</p>
+    <p>How a tool is defined, registered, guarded, executed, and rendered — pre-execute <i class="ph ph-arrow-right"></i> execute <i class="ph ph-arrow-right"></i> post-execute, parallel pools, and presentation views.</p>
   </a>
   <a class="card" data-lesson="10" href="lessons/0010-llm-seam.html">
     <span class="done-mark"><i class="ph ph-check"></i></span><span class="num"><i class="ph ph-gear-six"></i> Lesson 10 · core</span>
@@ -275,7 +275,7 @@ quick retrieval quiz at the end of each. Advanced material hides inside "Go deep
   <a class="card" href="reference/turn-flow.html">
     <span class="num"><i class="ph ph-flow-arrow"></i></span>
     <h3>Turn-flow poster</h3>
-    <p>The full annotated sequence: user message → turn → step → stream → tools → durable events.</p>
+    <p>The full annotated sequence: user message <i class="ph ph-arrow-right"></i> turn <i class="ph ph-arrow-right"></i> step <i class="ph ph-arrow-right"></i> stream <i class="ph ph-arrow-right"></i> tools <i class="ph ph-arrow-right"></i> durable events.</p>
   </a>
   <a class="card" href="reference/base-patch-tour.html">
     <span class="num"><i class="ph ph-stack"></i></span>
@@ -311,7 +311,7 @@ quick retrieval quiz at the end of each. Advanced material hides inside "Go deep
 <template id="tpl-desktop"><p>The Electron app ships the exact production runtime and owns a reserved <code>desktop</code> profile; the window loads the packaged Web assets and talks to a local Host over IPC.</p></template>
 <template id="tpl-profiles"><p>A profile is a directory under <code>$DSH_HOME/profiles/&lt;name&gt;</code> that lists which bundles to stack and keeps your own <code>cordis.patch.yml</code>. Its root <code>cordis.yml</code> is always the empty list <code>[]</code> — everything enters as a patch.</p></template>
 <template id="tpl-bundles"><p>A bundle is a distribution format: a <code>cordis.patch.yml</code> plus the code its rows mount. <code>dsh-base</code> is the shared spine used by web, headless, sdk, and acp.</p></template>
-<template id="tpl-patches"><p>A patch targets a row by <code>id</code>: replace its whole <code>config</code>, flip <code>disabled</code>, or <code>insert</code> new rows. Layers apply in order — bundles → profile patch → home patch → <code>--patch</code> files — last write wins per row.</p></template>
+<template id="tpl-patches"><p>A patch targets a row by <code>id</code>: replace its whole <code>config</code>, flip <code>disabled</code>, or <code>insert</code> new rows. Layers apply in order — bundles <i class="ph ph-arrow-right"></i> profile patch <i class="ph ph-arrow-right"></i> home patch <i class="ph ph-arrow-right"></i> <code>--patch</code> files — last write wins per row.</p></template>
 <template id="tpl-entries"><p>Each entry (row) names a module specifier like <code>@deepseek-ai/dsh-tools</code>. The Loader imports it, creates a fiber, waits for its <code>inject</code> services, then runs it. Order in the file is irrelevant — dependencies drive activation.</p></template>
 <template id="tpl-agents"><p>The live registry of agents plus the creation seam. It delegates to the factory the agent loop registers, so consumers never import the loop directly. Also owns the AsyncLocalStorage "initiator" scope that lets deep code find the current agent.</p></template>
 <template id="tpl-agentloop"><p>The concrete driver: claims inbox input, runs the pre-step waterfall, assembles the prompt, derives the request from the session log, streams the model call, dispatches tool calls, appends every durable event. A <em>plugin</em> — replaceable.</p></template>
@@ -326,10 +326,10 @@ quick retrieval quiz at the end of each. Advanced material hides inside "Go deep
 <template id="tpl-jobs"><p>The background-job registry: <code>run_in_background</code> bash calls, long-running terminals, and continuable subagents all register here; <code>job_*</code> tools read/stop them.</p></template>
 <template id="tpl-web-seam"><p>Model-facing <code>web_search</code>/<code>web_fetch</code>: provider registry for search (DeepSeek, Exa, Perplexity) and fetch (anonymous HTTP), consumed by <code>dsh-tool-web</code>.</p></template>
 <template id="tpl-context"><p>A Cordis context is a proxied service container. Reading <code>ctx.tools</code> goes through the reflect layer, which finds the registered implementation — and throws if none exists yet (unless declared via <code>inject</code>, which defers the read).</p><p><code>ctx.extend()</code> makes a child context; <code>ctx.isolate()</code> forks one service's resolution; <code>ctx.intercept()</code> adds config merges.</p></template>
-<template id="tpl-fiber"><p>One mounted plugin instance. Tracks its <code>inject</code> deps, owns every effect the plugin registers, and runs disposers in reverse order on unload. States: PENDING → LOADING → ACTIVE (+FAILED/UNLOADING/DISPOSED).</p></template>
+<template id="tpl-fiber"><p>One mounted plugin instance. Tracks its <code>inject</code> deps, owns every effect the plugin registers, and runs disposers in reverse order on unload. States: PENDING <i class="ph ph-arrow-right"></i> LOADING <i class="ph ph-arrow-right"></i> ACTIVE (+FAILED/UNLOADING/DISPOSED).</p></template>
 <template id="tpl-events"><p><code>emit</code> (observe), <code>parallel</code> (await all), <code>serial</code> (await, first bail wins), <code>bail</code> (sync first-wins), <code>waterfall</code> (around-middleware with <code>next()</code>). Listeners live and die with their fiber.</p></template>
 <template id="tpl-loader"><p>Loader turns entry rows into fibers; Include parses a <code>cordis.yml</code> file into rows and applies patch lists. Together they make "the app is a YAML file" real.</p></template>
-<template id="tpl-service"><p>Base class: <code>class Foo extends Service</code> → <code>super(ctx, 'foo')</code> registers the instance as <code>ctx.foo</code>, auto-removed when its fiber unloads. Almost every <code>ctx.*</code> in the harness is one of these.</p></template>
+<template id="tpl-service"><p>Base class: <code>class Foo extends Service</code> <i class="ph ph-arrow-right"></i> <code>super(ctx, 'foo')</code> registers the instance as <code>ctx.foo</code>, auto-removed when its fiber unloads. Almost every <code>ctx.*</code> in the harness is one of these.</p></template>
 
 <script src="assets/course.js"></script>
 </body>

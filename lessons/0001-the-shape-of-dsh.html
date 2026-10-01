@@ -49,28 +49,28 @@ configuration, removable from configuration.</p>
 <figure class="diagram">
 <svg viewBox="0 0 720 240">
   <g class="dg-node n-store" transform="translate(20,90)" data-dg-title="The model" data-dg-body="#t1-model">
-    <rect width="130" height="54" rx="10"/><text x="65" y="24" text-anchor="middle">LLM</text><text x="65" y="40" text-anchor="middle" class="sub">deepseek-flash</text>
+    <rect width="130" height="54" rx="4"/><text x="65" y="24" text-anchor="middle">LLM</text><text x="65" y="40" text-anchor="middle" class="sub">deepseek-flash</text>
   </g>
   <path class="dg-edge" d="M150 117 L190 117" marker-end="url(#arr1)"/>
   <path class="dg-edge" d="M190 117 L150 117" transform="translate(0,0)"/>
   <g class="dg-node n-core" transform="translate(195,90)" data-dg-title="The agent loop" data-dg-body="#t1-loop" data-dg-src="packages/core/agent-loop/src/agent.ts:98-138|ReactLoopAgent">
-    <rect width="130" height="54" rx="10"/><text x="65" y="24" text-anchor="middle">agent loop</text><text x="65" y="40" text-anchor="middle" class="sub">dsh-agent-loop</text>
+    <rect width="130" height="54" rx="4"/><text x="65" y="24" text-anchor="middle">agent loop</text><text x="65" y="40" text-anchor="middle" class="sub">dsh-agent-loop</text>
   </g>
   <path class="dg-edge" d="M325 117 L365 117"/>
   <g class="dg-node n-tool" transform="translate(370,40)" data-dg-title="Tools" data-dg-body="#t1-tools" data-dg-src="packages/core/tools/src/index.ts:807|ToolRuntime service">
-    <rect width="140" height="40" rx="10"/><text x="70" y="24" text-anchor="middle">tools (bash, fs, web…)</text>
+    <rect width="140" height="40" rx="4"/><text x="70" y="24" text-anchor="middle">tools (bash, fs, web…)</text>
   </g>
   <g class="dg-node n-event" transform="translate(370,140)" data-dg-title="The session log" data-dg-body="#t1-log" data-dg-src="packages/core/session/src/index.ts:446|class Session">
-    <rect width="140" height="40" rx="10"/><text x="70" y="24" text-anchor="middle">session log</text>
+    <rect width="140" height="40" rx="4"/><text x="70" y="24" text-anchor="middle">session log</text>
   </g>
   <path class="dg-edge dash" d="M440 80 L440 138"/>
   <path class="dg-edge" d="M510 60 L560 60"/>
   <path class="dg-edge" d="M510 160 L560 160"/>
   <g class="dg-node n-surface" transform="translate(565,35)" data-dg-title="Surfaces" data-dg-body="#t1-surfaces" data-dg-src="packages/bundle|packages/bundle/">
-    <rect width="140" height="46" rx="10"/><text x="70" y="20" text-anchor="middle">web · headless · sdk</text><text x="70" y="35" text-anchor="middle" class="sub">profiles</text>
+    <rect width="140" height="46" rx="4"/><text x="70" y="20" text-anchor="middle">web · headless · sdk</text><text x="70" y="35" text-anchor="middle" class="sub">profiles</text>
   </g>
   <g class="dg-node n-store" transform="translate(565,140)" data-dg-title="Persistence" data-dg-body="#t1-persist" data-dg-src="packages/session|packages/session/">
-    <rect width="140" height="46" rx="10"/><text x="70" y="20" text-anchor="middle">disk (JSONL)</text><text x="70" y="35" text-anchor="middle" class="sub">$DSH_HOME/sessions</text>
+    <rect width="140" height="46" rx="4"/><text x="70" y="20" text-anchor="middle">disk (JSONL)</text><text x="70" y="35" text-anchor="middle" class="sub">$DSH_HOME/sessions</text>
   </g>
   <defs><marker id="arr1" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
   <text class="dg-label" x="360" y="222" text-anchor="middle">a generic harness: loop ↔ model ↔ tools, with a log and a UI</text>

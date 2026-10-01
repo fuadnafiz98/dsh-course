@@ -32,25 +32,25 @@ the reason the same harness serves any model.</p>
 
 <h2>The shape of the seam</h2>
 <p><code>LlmRuntime</code> (<a class="code" data-src="packages/llm/llm/src/index.ts" data-lines="342-">packages/llm/llm/src/index.ts:342</a>)
-is just a service named <code>llm</code> holding a registry: <b>provider route → adapter</b>.
+is just a service named <code>llm</code> holding a registry: <b>provider route <i class="ph ph-arrow-right"></i> adapter</b>.
 An adapter is a plugin that knows one provider's wire format; it registers itself at mount and
 unregisters when its fiber unloads.</p>
 
 <figure class="diagram">
 <svg viewBox="0 0 760 320">
   <defs><marker id="ah10" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
-  <g class="dg-node n-core" transform="translate(40,60)" data-dg-title="the loop" data-dg-body="#t10-loop"><rect width="140" height="46" rx="9"/><text x="70" y="28" text-anchor="middle">ReactLoopAgent</text></g>
+  <g class="dg-node n-core" transform="translate(40,60)" data-dg-title="the loop" data-dg-body="#t10-loop"><rect width="140" height="46" rx="4"/><text x="70" y="28" text-anchor="middle">ReactLoopAgent</text></g>
   <path class="dg-edge" d="M180 83 L226 83" marker-end="url(#ah10)"/>
   <text class="dg-label" x="203" y="74" text-anchor="middle">ctx.llm</text>
   <g class="dg-node n-cordis" transform="translate(230,50)" data-dg-title="LlmRuntime" data-dg-body="#t10-runtime" data-dg-src="packages/llm/llm/src/index.ts:342|LlmRuntime">
-    <rect width="200" height="66" rx="9"/><text x="100" y="24" text-anchor="middle">LlmRuntime</text><text x="100" y="42" text-anchor="middle" class="sub">provider → adapter registry</text><text x="100" y="57" text-anchor="middle" class="sub">prepareCall · stream · discover</text>
+    <rect width="200" height="66" rx="4"/><text x="100" y="24" text-anchor="middle">LlmRuntime</text><text x="100" y="42" text-anchor="middle" class="sub">provider → adapter registry</text><text x="100" y="57" text-anchor="middle" class="sub">prepareCall · stream · discover</text>
   </g>
   <path class="dg-edge" d="M430 70 L470 40" marker-end="url(#ah10)"/>
   <path class="dg-edge" d="M430 96 L470 120" marker-end="url(#ah10)"/>
   <path class="dg-edge" d="M430 110 L470 200" marker-end="url(#ah10)"/>
-  <g class="dg-node n-tool" transform="translate(474,16)" data-dg-title="deepseek adapter" data-dg-body="#t10-ds"><rect width="200" height="46" rx="9"/><text x="100" y="20" text-anchor="middle">deepseek adapter</text><text x="100" y="36" text-anchor="middle" class="sub">deepseek-official · deepseek-flash</text></g>
-  <g class="dg-node n-tool" transform="translate(474,96)" data-dg-title="openai-style adapter" data-dg-body="#t10-oa"><rect width="200" height="46" rx="9"/><text x="100" y="20" text-anchor="middle">openai-compat adapter</text><text x="100" y="36" text-anchor="middle" class="sub">openai · anthropic · ollama …</text></g>
-  <g class="dg-node n-event" transform="translate(474,176)" data-dg-title="a test fake" data-dg-body="#t10-fake"><rect width="200" height="46" rx="9"/><text x="100" y="20" text-anchor="middle">snapshot adapter</text><text x="100" y="36" text-anchor="middle" class="sub">canned streams — no key needed</text></g>
+  <g class="dg-node n-tool" transform="translate(474,16)" data-dg-title="deepseek adapter" data-dg-body="#t10-ds"><rect width="200" height="46" rx="4"/><text x="100" y="20" text-anchor="middle">deepseek adapter</text><text x="100" y="36" text-anchor="middle" class="sub">deepseek-official · deepseek-flash</text></g>
+  <g class="dg-node n-tool" transform="translate(474,96)" data-dg-title="openai-style adapter" data-dg-body="#t10-oa"><rect width="200" height="46" rx="4"/><text x="100" y="20" text-anchor="middle">openai-compat adapter</text><text x="100" y="36" text-anchor="middle" class="sub">openai · anthropic · ollama …</text></g>
+  <g class="dg-node n-event" transform="translate(474,176)" data-dg-title="a test fake" data-dg-body="#t10-fake"><rect width="200" height="46" rx="4"/><text x="100" y="20" text-anchor="middle">snapshot adapter</text><text x="100" y="36" text-anchor="middle" class="sub">canned streams — no key needed</text></g>
   <text class="dg-label" x="380" y="270" text-anchor="middle">one interface — the loop is provider-agnostic; the registry is the whole seam</text>
 </svg>
 <figcaption>The registry is the seam: adapters register routes, the loop looks them up by
@@ -142,7 +142,7 @@ so no observer ever sees a half-swapped registry. This is a model for writing yo
 
 <p class="callout"><span class="tag">Primary source</span>
 Read <a class="code" data-src="packages/llm/llm/src/index.ts" data-lines="342-470">LlmRuntime</a>
-(<code>registerAdapter</code> → <code>prepareRoutes</code> → <code>commitRoutes</code> →
+(<code>registerAdapter</code> <i class="ph ph-arrow-right"></i> <code>prepareRoutes</code> <i class="ph ph-arrow-right"></i> <code>commitRoutes</code> <i class="ph ph-arrow-right"></i>
 <code>prepareCall</code>), then the canonical types in
 <a class="code" data-src="packages/llm/llm/src/types.ts">types.ts</a> — that's the message vocabulary
 every adapter speaks.</p>

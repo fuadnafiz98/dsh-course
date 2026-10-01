@@ -50,15 +50,15 @@ product-level glue. <code>createScope(ctx, subject)</code> mints an agent-scoped
 <figure class="diagram">
 <svg viewBox="0 0 760 330">
   <defs><marker id="ah11" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
-  <g class="dg-node n-cordis" transform="translate(280,20)" data-dg-title="root ctx" data-dg-body="#t11-root"><rect width="200" height="40" rx="9"/><text x="100" y="25" text-anchor="middle">root ctx · global registrations</text></g>
+  <g class="dg-node n-cordis" transform="translate(280,20)" data-dg-title="root ctx" data-dg-body="#t11-root"><rect width="200" height="40" rx="4"/><text x="100" y="25" text-anchor="middle">root ctx · global registrations</text></g>
   <path class="dg-edge" d="M340 60 L240 96" marker-end="url(#ah11)"/><path class="dg-edge" d="M420 60 L520 96" marker-end="url(#ah11)"/>
   <text class="dg-label" x="268" y="86" text-anchor="middle">agent A's scope</text>
   <text class="dg-label" x="560" y="86" text-anchor="middle">agent B's scope</text>
-  <g class="dg-node n-core" transform="translate(120,96)" data-dg-title="scope A" data-dg-body="#t11-a"><rect width="200" height="54" rx="9"/><text x="100" y="24" text-anchor="middle">scope A ctx</text><text x="100" y="41" text-anchor="middle" class="sub">isolate('tools') → scoped registry</text></g>
-  <g class="dg-node n-core" transform="translate(440,96)" data-dg-title="scope B" data-dg-body="#t11-b"><rect width="200" height="54" rx="9"/><text x="100" y="24" text-anchor="middle">scope B ctx</text><text x="100" y="41" text-anchor="middle" class="sub">isolate('compaction') → own realm</text></g>
+  <g class="dg-node n-core" transform="translate(120,96)" data-dg-title="scope A" data-dg-body="#t11-a"><rect width="200" height="54" rx="4"/><text x="100" y="24" text-anchor="middle">scope A ctx</text><text x="100" y="41" text-anchor="middle" class="sub">isolate('tools') → scoped registry</text></g>
+  <g class="dg-node n-core" transform="translate(440,96)" data-dg-title="scope B" data-dg-body="#t11-b"><rect width="200" height="54" rx="4"/><text x="100" y="24" text-anchor="middle">scope B ctx</text><text x="100" y="41" text-anchor="middle" class="sub">isolate('compaction') → own realm</text></g>
   <path class="dg-edge" d="M240 150 L240 184" marker-end="url(#ah11)"/>
-  <g class="dg-node n-tool" transform="translate(120,190)" data-dg-title="scope A sees a subset" data-dg-body="#t11-subset"><rect width="200" height="40" rx="9"/><text x="100" y="25" text-anchor="middle">tools: {read, glob} — no bash</text></g>
-  <g class="dg-node n-event" transform="translate(440,190)" data-dg-title="events route by key" data-dg-body="#t11-events"><rect width="200" height="40" rx="9"/><text x="100" y="25" text-anchor="middle">agent/* events tagged by key</text></g>
+  <g class="dg-node n-tool" transform="translate(120,190)" data-dg-title="scope A sees a subset" data-dg-body="#t11-subset"><rect width="200" height="40" rx="4"/><text x="100" y="25" text-anchor="middle">tools: {read, glob} — no bash</text></g>
+  <g class="dg-node n-event" transform="translate(440,190)" data-dg-title="events route by key" data-dg-body="#t11-events"><rect width="200" height="40" rx="4"/><text x="100" y="25" text-anchor="middle">agent/* events tagged by key</text></g>
   <text class="dg-label" x="380" y="270" text-anchor="middle">registrations inherit DOWN (child sees ancestors' layers)</text>
   <text class="dg-label" x="380" y="290" text-anchor="middle">event admission extends UP (a parent listener sees a descendant's events)</text>
 </svg>

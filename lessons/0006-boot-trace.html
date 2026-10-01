@@ -36,44 +36,44 @@ composition (lesson 5) meets the Cordis runtime (lessons 2–4).</p>
   <defs><marker id="ah6" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
 
   <g class="dg-node n-surface" transform="translate(40,20)" data-dg-title="apps/cli/src/bin.ts" data-dg-body="#t6-bin" data-dg-src="apps/cli/src/bin.ts:26-74|runCli()">
-    <rect width="300" height="52" rx="9"/><text x="150" y="22" text-anchor="middle">bin.ts — parseDshArgs(argv)</text><text x="150" y="40" text-anchor="middle" class="sub">dispatch on invocation.mode</text>
+    <rect width="300" height="52" rx="4"/><text x="150" y="22" text-anchor="middle">bin.ts — parseDshArgs(argv)</text><text x="150" y="40" text-anchor="middle" class="sub">dispatch on invocation.mode</text>
   </g>
   <path class="dg-edge" d="M190 72 L190 100" marker-end="url(#ah6)"/>
 
   <g class="dg-node n-cordis" transform="translate(40,106)" data-dg-title="profile-boot.ts — composeProfile" data-dg-body="#t6-compose" data-dg-src="apps/cli/src/profile-boot.ts:197-209|composeProfile()">
-    <rect width="300" height="52" rx="9"/><text x="150" y="22" text-anchor="middle">profile-boot.ts — compose layers</text><text x="150" y="40" text-anchor="middle" class="sub">bundles → profile → home → --patch</text>
+    <rect width="300" height="52" rx="4"/><text x="150" y="22" text-anchor="middle">profile-boot.ts — compose layers</text><text x="150" y="40" text-anchor="middle" class="sub">bundles → profile → home → --patch</text>
   </g>
   <path class="dg-edge" d="M190 158 L190 186" marker-end="url(#ah6)"/>
 
   <g class="dg-node n-cordis" transform="translate(40,192)" data-dg-title="profile-boot.ts — runProfile" data-dg-body="#t6-runprofile" data-dg-src="apps/cli/src/profile-boot.ts:244-319|runProfile()">
-    <rect width="300" height="52" rx="9"/><text x="150" y="22" text-anchor="middle">runProfile() — launch facts</text><text x="150" y="40" text-anchor="middle" class="sub">env snapshot · proxy · signals · fail-loud</text>
+    <rect width="300" height="52" rx="4"/><text x="150" y="22" text-anchor="middle">runProfile() — launch facts</text><text x="150" y="40" text-anchor="middle" class="sub">env snapshot · proxy · signals · fail-loud</text>
   </g>
   <path class="dg-edge" d="M190 244 L190 272" marker-end="url(#ah6)"/>
 
   <g class="dg-node n-cordis" transform="translate(40,278)" data-dg-title="app-boot — boot()" data-dg-body="#t6-boot" data-dg-src="packages/boot/app-boot/src/index.ts:972-1038|boot()">
-    <rect width="300" height="52" rx="9"/><text x="150" y="22" text-anchor="middle">boot() — new Context()</text><text x="150" y="40" text-anchor="middle" class="sub">mount Loader → prepare() → Include</text>
+    <rect width="300" height="52" rx="4"/><text x="150" y="22" text-anchor="middle">boot() — new Context()</text><text x="150" y="40" text-anchor="middle" class="sub">mount Loader → prepare() → Include</text>
   </g>
   <path class="dg-edge" d="M190 330 L190 358" marker-end="url(#ah6)"/>
 
   <g class="dg-node n-core" transform="translate(40,364)" data-dg-title="mountRootInclude" data-dg-body="#t6-include" data-dg-src="packages/boot/app-boot/src/index.ts:538-585|mountRootInclude()">
-    <rect width="300" height="52" rx="9"/><text x="150" y="22" text-anchor="middle">mountRootInclude()</text><text x="150" y="40" text-anchor="middle" class="sub">the `cordis:include` builtin reads the tree</text>
+    <rect width="300" height="52" rx="4"/><text x="150" y="22" text-anchor="middle">mountRootInclude()</text><text x="150" y="40" text-anchor="middle" class="sub">the `cordis:include` builtin reads the tree</text>
   </g>
   <path class="dg-edge" d="M190 416 L190 444" marker-end="url(#ah6)"/>
 
   <g class="dg-node n-event" transform="translate(40,450)" data-dg-title="Fibers activate" data-dg-body="#t6-fibers" data-dg-src="vendor/loader/src/index.ts|Loader">
-    <rect width="300" height="52" rx="9"/><text x="150" y="22" text-anchor="middle">Loader mounts every row</text><text x="150" y="40" text-anchor="middle" class="sub">dependency order — inject drives it</text>
+    <rect width="300" height="52" rx="4"/><text x="150" y="22" text-anchor="middle">Loader mounts every row</text><text x="150" y="40" text-anchor="middle" class="sub">dependency order — inject drives it</text>
   </g>
   <path class="dg-edge" d="M190 502 L190 516" marker-end="url(#ah6)"/>
   <g class="dg-node n-tool" transform="translate(40,522)" data-dg-title="auditStartupEntries" data-dg-body="#t6-audit" data-dg-src="packages/boot/app-boot/src/index.ts:925-939|auditStartupEntries()">
-    <rect width="300" height="34" rx="9"/><text x="150" y="22" text-anchor="middle">audit → required ids ACTIVE?</text>
+    <rect width="300" height="34" rx="4"/><text x="150" y="22" text-anchor="middle">audit → required ids ACTIVE?</text>
   </g>
 
   <g class="dg-node n-surface" transform="translate(440,192)" data-dg-title="In the prepare() callback" data-dg-body="#t6-prepare" data-dg-src="apps/cli/src/profile-boot.ts:296-312|host setup callback">
-    <rect width="290" height="96" rx="9"/><text x="145" y="24" text-anchor="middle">host setup (before any row mounts)</text><text x="145" y="46" text-anchor="middle" class="sub">provide profileContext</text><text x="145" y="63" text-anchor="middle" class="sub">provide launch environment snapshot</text><text x="145" y="80" text-anchor="middle" class="sub">mount PluginPackages · cmdlineArgs</text>
+    <rect width="290" height="96" rx="4"/><text x="145" y="24" text-anchor="middle">host setup (before any row mounts)</text><text x="145" y="46" text-anchor="middle" class="sub">provide profileContext</text><text x="145" y="63" text-anchor="middle" class="sub">provide launch environment snapshot</text><text x="145" y="80" text-anchor="middle" class="sub">mount PluginPackages · cmdlineArgs</text>
   </g>
   <path class="dg-edge dash" d="M340 214 L438 230"/>
   <g class="dg-node n-tool" transform="translate(440,330)" data-dg-title="The web surface" data-dg-body="#t6-web" data-dg-src="packages/bundle/web-app/cordis.patch.yml|web-app bundle">
-    <rect width="290" height="86" rx="9"/><text x="145" y="24" text-anchor="middle">`web` profile rows activate</text><text x="145" y="46" text-anchor="middle" class="sub">webserver · typert gateway · host API</text><text x="145" y="63" text-anchor="middle" class="sub">client plugin rows mount</text>
+    <rect width="290" height="86" rx="4"/><text x="145" y="24" text-anchor="middle">`web` profile rows activate</text><text x="145" y="46" text-anchor="middle" class="sub">webserver · typert gateway · host API</text><text x="145" y="63" text-anchor="middle" class="sub">client plugin rows mount</text>
   </g>
   <path class="dg-edge dash" d="M340 388 L438 372"/>
   <text class="dg-label" x="585" y="446" text-anchor="middle">ready — process lives</text>
@@ -103,7 +103,7 @@ does everything the <i>process</i> owns before the plugin tree gets a say:</p>
 <ul>
   <li>installs the launch-environment proxy (Node's <code>fetch</code> won't read a
   <code>.env</code>-declared proxy on its own)</li>
-  <li>registers SIGTERM/SIGINT → bounded shutdown</li>
+  <li>registers SIGTERM/SIGINT <i class="ph ph-arrow-right"></i> bounded shutdown</li>
   <li>installs the <b>fail-loud</b> handler: any unhandled rejection or uncaught exception is a
   fatal, labelled exit — because "silently wrong" is worse than "loudly dead"</li>
   <li>builds <code>ProfileContext</code> — the launch facts every plugin can read:
@@ -121,7 +121,7 @@ does everything the <i>process</i> owns before the plugin tree gets a say:</p>
   consult exist before the expressions run.</p>
 </div>
 
-<h2>Stage 4 — boot(): Context → Loader → Include → audit</h2>
+<h2>Stage 4 — boot(): Context <i class="ph ph-arrow-right"></i> Loader <i class="ph ph-arrow-right"></i> Include <i class="ph ph-arrow-right"></i> audit</h2>
 <p><a class="code" data-src="packages/boot/app-boot/src/index.ts" data-lines="972-1038">boot()</a>
 is short and surgical:</p>
 <ol>
@@ -209,14 +209,14 @@ Re-trace this path yourself in the editor: <code>bin.ts → profile-boot.ts → 
 
 <template id="t6-bin"><p>The public entrypoint. <code>parseDshArgs</code> turns argv into a mode;
 <code>profile</code> mode calls <code>runProfile()</code>. Every other concern is delegated.</p></template>
-<template id="t6-compose"><p>Assembles the patch stack: bundle layers in profile order → the
-profile's own cordis.patch.yml → the home-level patch → <code>--patch</code> overlays → the
+<template id="t6-compose"><p>Assembles the patch stack: bundle layers in profile order <i class="ph ph-arrow-right"></i> the
+profile's own cordis.patch.yml <i class="ph ph-arrow-right"></i> the home-level patch <i class="ph ph-arrow-right"></i> <code>--patch</code> overlays <i class="ph ph-arrow-right"></i> the
 telemetry switch. Computes the runtime resolution before any plugin imports.</p></template>
 <template id="t6-runprofile"><p>The process-level launcher: proxy env, signals, fail-loud,
 ProfileContext assembly, then <code>boot()</code> with the host-setup callback.</p></template>
-<template id="t6-boot"><p><code>new Context()</code> → diagnostics collector → baseUrl →
-<code>ctx.plugin(Loader)</code> → <code>prepare()</code> → <code>mountRootInclude()</code> →
-<code>ctx.loader.await()</code> → <code>auditStartupEntries()</code>.</p></template>
+<template id="t6-boot"><p><code>new Context()</code> <i class="ph ph-arrow-right"></i> diagnostics collector <i class="ph ph-arrow-right"></i> baseUrl <i class="ph ph-arrow-right"></i>
+<code>ctx.plugin(Loader)</code> <i class="ph ph-arrow-right"></i> <code>prepare()</code> <i class="ph ph-arrow-right"></i> <code>mountRootInclude()</code> <i class="ph ph-arrow-right"></i>
+<code>ctx.loader.await()</code> <i class="ph ph-arrow-right"></i> <code>auditStartupEntries()</code>.</p></template>
 <template id="t6-include"><p>Mounts the <code>cordis:include</code> builtin pointed at the composed
 config path with the prepared patch list. This is the moment YAML starts becoming fibers.</p></template>
 <template id="t6-fibers"><p>Each row resolves its module, spawns a fiber, waits on its injects, then

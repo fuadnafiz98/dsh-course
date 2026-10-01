@@ -48,16 +48,16 @@ TypeScript <code>EventMap</code> merging), not of the call site.</p>
 <svg viewBox="0 0 740 340">
   <defs><marker id="ah4" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
   <g class="dg-node n-core" transform="translate(30,30)" data-dg-title="emit — observe" data-dg-body="#t4-emit">
-    <rect width="140" height="36" rx="8"/><text x="70" y="22" text-anchor="middle">emit</text>
+    <rect width="140" height="36" rx="4"/><text x="70" y="22" text-anchor="middle">emit</text>
   </g>
   <g class="dg-node n-core" transform="translate(200,30)" data-dg-title="parallel — await all" data-dg-body="#t4-parallel">
-    <rect width="140" height="36" rx="8"/><text x="70" y="22" text-anchor="middle">parallel</text>
+    <rect width="140" height="36" rx="4"/><text x="70" y="22" text-anchor="middle">parallel</text>
   </g>
   <g class="dg-node n-core" transform="translate(370,30)" data-dg-title="serial — in order" data-dg-body="#t4-serial">
-    <rect width="140" height="36" rx="8"/><text x="70" y="22" text-anchor="middle">serial</text>
+    <rect width="140" height="36" rx="4"/><text x="70" y="22" text-anchor="middle">serial</text>
   </g>
   <g class="dg-node n-core" transform="translate(540,30)" data-dg-title="bail — first wins" data-dg-body="#t4-bail">
-    <rect width="140" height="36" rx="8"/><text x="70" y="22" text-anchor="middle">bail</text>
+    <rect width="140" height="36" rx="4"/><text x="70" y="22" text-anchor="middle">bail</text>
   </g>
 
   <text class="dg-label" x="70" y="86" text-anchor="middle">→ all, sync-ish</text>
@@ -66,21 +66,21 @@ TypeScript <code>EventMap</code> merging), not of the call site.</p>
   <text class="dg-label" x="610" y="86" text-anchor="middle">→ first truthy wins</text>
 
   <g class="dg-node n-event" transform="translate(30,120)" data-dg-title="waterfall — the middleware spine" data-dg-body="#t4-waterfall" data-dg-src="vendor/cordis/src/events.ts:253-320|waterfall impl">
-    <rect width="200" height="44" rx="8"/><text x="100" y="27" text-anchor="middle">waterfall — chain of next()</text>
+    <rect width="200" height="44" rx="4"/><text x="100" y="27" text-anchor="middle">waterfall — chain of next()</text>
   </g>
 
   <path class="dg-edge" d="M230 142 L270 142" marker-end="url(#ah4)"/>
-  <g class="dg-node n-tool" transform="translate(276,124)" data-dg-title="listener 1" data-dg-body="#t4-l1"><rect width="84" height="36" rx="8"/><text x="42" y="22" text-anchor="middle">hook 1</text></g>
+  <g class="dg-node n-tool" transform="translate(276,124)" data-dg-title="listener 1" data-dg-body="#t4-l1"><rect width="84" height="36" rx="4"/><text x="42" y="22" text-anchor="middle">hook 1</text></g>
   <path class="dg-edge" d="M360 142 L400 142" marker-end="url(#ah4)"/>
-  <g class="dg-node n-tool" transform="translate(406,124)" data-dg-title="listener 2" data-dg-body="#t4-l2"><rect width="84" height="36" rx="8"/><text x="42" y="22" text-anchor="middle">hook 2</text></g>
+  <g class="dg-node n-tool" transform="translate(406,124)" data-dg-title="listener 2" data-dg-body="#t4-l2"><rect width="84" height="36" rx="4"/><text x="42" y="22" text-anchor="middle">hook 2</text></g>
   <path class="dg-edge" d="M490 142 L530 142" marker-end="url(#ah4)"/>
-  <g class="dg-node n-core" transform="translate(536,124)" data-dg-title="the innermost callee" data-dg-body="#t4-inner"><rect width="120" height="36" rx="8"/><text x="60" y="22" text-anchor="middle">the callee</text></g>
+  <g class="dg-node n-core" transform="translate(536,124)" data-dg-title="the innermost callee" data-dg-body="#t4-inner"><rect width="120" height="36" rx="4"/><text x="60" y="22" text-anchor="middle">the callee</text></g>
 
   <text class="dg-label" x="360" y="186" text-anchor="middle">each hook receives (payload, next) and must call next() — returning without it short-circuits</text>
   <text class="dg-label" x="360" y="206" text-anchor="middle">that one rule IS the policy surface: intercept before, inspect after</text>
 
   <g class="dg-node n-cordis" transform="translate(200,240)" data-dg-title="Where waterfall lives in the harness" data-dg-body="#t4-uses" data-dg-src="packages/core/agent-loop/src/agent.ts:340-400|agent/pre-step · agent/request">
-    <rect width="340" height="70" rx="10"/><text x="170" y="24" text-anchor="middle">agent/pre-step · agent/request · llm/stream</text><text x="170" y="44" text-anchor="middle" class="sub">tools/pre-execute · tools/post-execute</text><text x="170" y="60" text-anchor="middle" class="sub">session/announce · approval gates</text>
+    <rect width="340" height="70" rx="4"/><text x="170" y="24" text-anchor="middle">agent/pre-step · agent/request · llm/stream</text><text x="170" y="44" text-anchor="middle" class="sub">tools/pre-execute · tools/post-execute</text><text x="170" y="60" text-anchor="middle" class="sub">session/announce · approval gates</text>
   </g>
 </svg>
 <figcaption>The four simple modes are convenience. <b>Waterfall is where the product lives</b> —
@@ -184,7 +184,7 @@ top-down — the mode dispatch is a small readable kernel. Then find one waterfa
 
 </main>
 
-<template id="t4-emit"><p><code>emit(name, ...args)</code> → every listener, synchronously fired, not
+<template id="t4-emit"><p><code>emit(name, ...args)</code> <i class="ph ph-arrow-right"></i> every listener, synchronously fired, not
 awaited. Use for facts: "this happened." UI updates, telemetry, status.</p></template>
 <template id="t4-parallel"><p>All listeners run concurrently; the dispatch resolves when they all
 resolve. "Everyone needs to be done before I proceed."</p></template>

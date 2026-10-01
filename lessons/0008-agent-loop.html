@@ -36,7 +36,7 @@ end you'll be able to read the whole turn lifecycle as a program.</p>
   <tr><td><b>Turn</b></td><td>One "go" at the user's input — may contain many steps. Bracketed by <code>turn/start</code> / <code>turn/end</code>.</td></tr>
   <tr><td><b>Step</b></td><td>One model call + the tool executions it requested. Bracketed by <code>step/start</code> / <code>step/end</code>.</td></tr>
   <tr><td><b>Inbox</b></td><td>Queued user/steering/injected input, in two lanes (<code>next-turn</code> vs <code>next-step</code>).</td></tr>
-  <tr><td><b>Phase</b></td><td>The driver's state: <code>idle</code> → <code>running</code> (a driver owns turns) or <code>maintenance</code>.</td></tr>
+  <tr><td><b>Phase</b></td><td>The driver's state: <code>idle</code> <i class="ph ph-arrow-right"></i> <code>running</code> (a driver owns turns) or <code>maintenance</code>.</td></tr>
   <tr><td><b>Dispatch</b></td><td>A fused event emitter that fires all the <code>agent/*</code> events for this agent.</td></tr>
 </table>
 
@@ -46,45 +46,45 @@ end you'll be able to read the whole turn lifecycle as a program.</p>
   <defs><marker id="ah8" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="none" stroke="currentColor"/></marker></defs>
 
   <g class="dg-node n-surface" transform="translate(300,14)" data-dg-title="Input arrives" data-dg-body="#t8-send" data-dg-src="packages/core/agent-loop/src/agent.ts:154-181|send / followup / steer / inject">
-    <rect width="180" height="40" rx="9"/><text x="90" y="24" text-anchor="middle">send() / followup()</text>
+    <rect width="180" height="40" rx="4"/><text x="90" y="24" text-anchor="middle">send() / followup()</text>
   </g>
   <path class="dg-edge" d="M390 54 L390 76" marker-end="url(#ah8)"/>
   <g class="dg-node n-cordis" transform="translate(300,82)" data-dg-title="Inbox + wake" data-dg-body="#t8-inbox" data-dg-src="packages/core/agent-loop/src/inbox.ts|ReactLoopInbox">
-    <rect width="180" height="40" rx="9"/><text x="90" y="24" text-anchor="middle">inbox.splice → wakeDriver</text>
+    <rect width="180" height="40" rx="4"/><text x="90" y="24" text-anchor="middle">inbox.splice → wakeDriver</text>
   </g>
   <path class="dg-edge" d="M390 122 L390 144" marker-end="url(#ah8)"/>
   <g class="dg-node n-core" transform="translate(290,150)" data-dg-title="turn()" data-dg-body="#t8-turn" data-dg-src="packages/core/agent-loop/src/agent.ts:296-396|turn()">
-    <rect width="200" height="44" rx="9"/><text x="100" y="20" text-anchor="middle">turn() — append turn/start</text><text x="100" y="37" text-anchor="middle" class="sub">then loop steps until the turn ends</text>
+    <rect width="200" height="44" rx="4"/><text x="100" y="20" text-anchor="middle">turn() — append turn/start</text><text x="100" y="37" text-anchor="middle" class="sub">then loop steps until the turn ends</text>
   </g>
 
   <path class="dg-edge" d="M390 194 L390 218" marker-end="url(#ah8)"/>
   <g class="dg-node n-core" transform="translate(290,224)" data-dg-title="preStep() — admit the step" data-dg-body="#t8-prestep" data-dg-src="packages/core/agent-loop/src/agent.ts:267-286|preStep()">
-    <rect width="200" height="56" rx="9"/><text x="100" y="20" text-anchor="middle">preStep()</text><text x="100" y="37" text-anchor="middle" class="sub">claim input → assemble prompt →</text><text x="100" y="51" text-anchor="middle" class="sub">agent/pre-step waterfall</text>
+    <rect width="200" height="56" rx="4"/><text x="100" y="20" text-anchor="middle">preStep()</text><text x="100" y="37" text-anchor="middle" class="sub">claim input → assemble prompt →</text><text x="100" y="51" text-anchor="middle" class="sub">agent/pre-step waterfall</text>
   </g>
 
   <path class="dg-edge" d="M390 280 L390 304" marker-end="url(#ah8)"/>
   <g class="dg-node n-core" transform="translate(290,310)" data-dg-title="step() — prepare + build" data-dg-body="#t8-prepare" data-dg-src="packages/core/agent-loop/src/agent.ts:546-687|prepareRequest · buildRequest">
-    <rect width="200" height="66" rx="9"/><text x="100" y="20" text-anchor="middle">step(): prepareRequest()</text><text x="100" y="37" text-anchor="middle" class="sub">agent/request waterfall → llm.prepareCall</text><text x="100" y="52" text-anchor="middle" class="sub">buildRequest → request/header + deriveMessages</text>
+    <rect width="200" height="66" rx="4"/><text x="100" y="20" text-anchor="middle">step(): prepareRequest()</text><text x="100" y="37" text-anchor="middle" class="sub">agent/request waterfall → llm.prepareCall</text><text x="100" y="52" text-anchor="middle" class="sub">buildRequest → request/header + deriveMessages</text>
   </g>
 
   <path class="dg-edge" d="M390 376 L390 400" marker-end="url(#ah8)"/>
   <g class="dg-node n-store" transform="translate(290,406)" data-dg-title="stream the model call" data-dg-body="#t8-stream" data-dg-src="packages/core/agent-loop/src/agent.ts:426-486|stream loop">
-    <rect width="200" height="54" rx="9"/><text x="100" y="22" text-anchor="middle">preparedCall.stream(request)</text><text x="100" y="39" text-anchor="middle" class="sub">each frame → agent/assistant-stream</text>
+    <rect width="200" height="54" rx="4"/><text x="100" y="22" text-anchor="middle">preparedCall.stream(request)</text><text x="100" y="39" text-anchor="middle" class="sub">each frame → agent/assistant-stream</text>
   </g>
 
   <path class="dg-edge" d="M390 460 L390 484" marker-end="url(#ah8)"/>
   <g class="dg-node n-event" transform="translate(270,490)" data-dg-title="settle the assistant message" data-dg-body="#t8-settle" data-dg-src="packages/core/agent-loop/src/agent.ts:512-533|assistant/message append">
-    <rect width="240" height="44" rx="9"/><text x="120" y="19" text-anchor="middle">settle: assistant/message</text><text x="120" y="36" text-anchor="middle" class="sub">(or assistant/attempt on failure)</text>
+    <rect width="240" height="44" rx="4"/><text x="120" y="19" text-anchor="middle">settle: assistant/message</text><text x="120" y="36" text-anchor="middle" class="sub">(or assistant/attempt on failure)</text>
   </g>
 
   <path class="dg-edge" d="M390 534 L390 558" marker-end="url(#ah8)"/>
   <g class="dg-node n-tool" transform="translate(290,564)" data-dg-title="execute tool calls" data-dg-body="#t8-tools" data-dg-src="packages/core/agent-loop/src/tool-calls.ts|executeToolCalls">
-    <rect width="200" height="44" rx="9"/><text x="90" y="19" text-anchor="middle">executeToolCalls()</text><text x="90" y="36" text-anchor="middle" class="sub">tool/call → tool/result, in order</text>
+    <rect width="200" height="44" rx="4"/><text x="90" y="19" text-anchor="middle">executeToolCalls()</text><text x="90" y="36" text-anchor="middle" class="sub">tool/call → tool/result, in order</text>
   </g>
 
   <path class="dg-edge" d="M390 608 L390 626" marker-end="url(#ah8)"/>
   <g class="dg-node n-cordis" transform="translate(290,632)" data-dg-title="turn ends" data-dg-body="#t8-end">
-    <rect width="200" height="26" rx="9"/><text x="100" y="17" text-anchor="middle">turn/end { reason }</text>
+    <rect width="200" height="26" rx="4"/><text x="100" y="17" text-anchor="middle">turn/end { reason }</text>
   </g>
 
   <text class="dg-label" x="640" y="338" text-anchor="middle">waterfalls at every joint —</text>
@@ -118,7 +118,7 @@ is the front door of every step:</p>
   <li><b>Assemble the prompt</b> — <code>ctx.systemPrompt.assemble()</code> gathers registered sections + tool schemas.</li>
   <li><b>Project runtime context</b> — a synthetic user-role message with cwd, file changes, etc.</li>
   <li><b>Run the <code>agent/pre-step</code> waterfall</b> — any plugin can reject the step
-  (<code>{kind:'reject'}</code> → turn ends <code>blocked</code>) or rewrite the admitted messages.
+  (<code>{kind:'reject'}</code> <i class="ph ph-arrow-right"></i> turn ends <code>blocked</code>) or rewrite the admitted messages.
   Compaction hooks here.</li>
 </ol>
 <p>If the decision is <code>enter</code>, the loop appends <code>step/start</code> and calls
@@ -130,7 +130,7 @@ is the front door of every step:</p>
 builds the call config through another waterfall:</p>
 <ul>
   <li>Seed config = the agent's declared <code>{provider, model}</code> route + persisted effort settings.</li>
-  <li><code>agent/request</code> waterfall → plugins mutate the proposal (a plugin could swap the model, cap max_tokens, inject headers).</li>
+  <li><code>agent/request</code> waterfall <i class="ph ph-arrow-right"></i> plugins mutate the proposal (a plugin could swap the model, cap max_tokens, inject headers).</li>
   <li><code>ctx.llm.prepareCall(config)</code> binds the provider adapter — lesson 10. If no adapter exists (<code>NO_ADAPTER</code>), the loop still proceeds with the raw config so middleware can serve it.</li>
 </ul>
 <p>Then <code>buildRequest()</code>
@@ -145,9 +145,9 @@ context</b> — and freezes the result into the request.</p>
 for the UI. But <b>durability is the point</b>: the loop accumulates the stream in an
 <code>AssistantStreamAttempt</code> and then <i>settles</i> it:</p>
 <ul>
-  <li><b>Success</b> → <code>assistant/message</code> (surface event: text + reasoning + tool calls + the exact stream + usage).</li>
-  <li><b>Aborted mid-stream with content</b> → <code>assistant/message</code> with <code>interrupted: true</code>.</li>
-  <li><b>Failure / empty abort</b> → <code>assistant/attempt</code> — the failed stream, durable, so retry never fabricates history.</li>
+  <li><b>Success</b> <i class="ph ph-arrow-right"></i> <code>assistant/message</code> (surface event: text + reasoning + tool calls + the exact stream + usage).</li>
+  <li><b>Aborted mid-stream with content</b> <i class="ph ph-arrow-right"></i> <code>assistant/message</code> with <code>interrupted: true</code>.</li>
+  <li><b>Failure / empty abort</b> <i class="ph ph-arrow-right"></i> <code>assistant/attempt</code> — the failed stream, durable, so retry never fabricates history.</li>
 </ul>
 <p>That settle step is the "model-visible ⟺ logged" rule in action: whatever the model would see
 next turn is already an event.</p>
@@ -163,9 +163,9 @@ an unclosed turn.</p>
 
 <div class="callout key">
   <span class="tag">The whole lesson in one sentence</span>
-  <p>The loop is a <b>transaction writer</b>: for each step it claims input → admits via
-  <code>pre-step</code> → prepares config via <code>agent/request</code> → logs the request header →
-  streams → settles an assistant event → runs tools → and always writes <code>turn/end</code>.
+  <p>The loop is a <b>transaction writer</b>: for each step it claims input <i class="ph ph-arrow-right"></i> admits via
+  <code>pre-step</code> <i class="ph ph-arrow-right"></i> prepares config via <code>agent/request</code> <i class="ph ph-arrow-right"></i> logs the request header <i class="ph ph-arrow-right"></i>
+  streams <i class="ph ph-arrow-right"></i> settles an assistant event <i class="ph ph-arrow-right"></i> runs tools <i class="ph ph-arrow-right"></i> and always writes <code>turn/end</code>.
   Every seam is a waterfall; every effect is durable.</p>
 </div>
 
