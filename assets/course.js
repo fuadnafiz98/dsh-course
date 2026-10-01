@@ -76,7 +76,7 @@
   var panel = document.createElement('aside');
   panel.className = 'dg-panel';
   panel.innerHTML =
-    '<header><h3 id="dg-panel-title"></h3><button aria-label="Close">✕</button></header>' +
+    '<header><h3 id="dg-panel-title"></h3><button aria-label="Close"><i class="ph ph-x"></i></button></header>' +
     '<div class="body"><div id="dg-panel-body"></div><div class="srcs"></div></div>';
   document.addEventListener('DOMContentLoaded', function () {
     document.body.appendChild(backdrop);
@@ -142,7 +142,7 @@
       var done = false;
       try { done = !!localStorage.getItem(doneKey(n)); } catch (e) {}
       btn.classList.toggle('done', done);
-      btn.textContent = done ? '✓ Completed — click to undo' : 'Mark this lesson complete';
+      btn.innerHTML = done ? '<i class="ph ph-check"></i> Completed — click to undo' : 'Mark this lesson complete';
     }
     btn.addEventListener('click', function () {
       try {

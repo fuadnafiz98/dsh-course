@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="stylesheet" href="assets/course.css">
 </head>
 <body>
@@ -17,7 +18,7 @@
   <a href="#lessons">lessons</a>
   <a href="#reference">reference</a>
   <span class="spacer"></span>
-  <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener">github ↗</a>
+  <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener">github <i class="ph ph-arrow-up-right"></i></a>
 </nav>
 
 <main class="wide">
@@ -188,62 +189,62 @@ quick retrieval quiz at the end of each. Advanced material hides inside "Go deep
 
 <div class="cards">
   <a class="card" data-lesson="1" href="lessons/0001-the-shape-of-dsh.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 01 · foundations</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 01 · foundations</span>
     <h3>The shape of dsh</h3>
     <p>What an agent harness even is, why this one is "all-plugin", and the five-layer mental model that makes the repo navigable.</p>
   </a>
   <a class="card" data-lesson="2" href="lessons/0002-cordis-context.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 02 · cordis</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 02 · cordis</span>
     <h3>Context: the shared world</h3>
     <p><code>ctx</code>, the proxy that resolves services, <code>provide</code>/<code>get</code>, and child contexts via <code>extend</code>/<code>isolate</code>/<code>intercept</code>.</p>
   </a>
   <a class="card" data-lesson="3" href="lessons/0003-plugins-fibers-effects.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 03 · cordis</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 03 · cordis</span>
     <h3>Plugins, fibers &amp; effects</h3>
     <p>Three plugin shapes, the PENDING→ACTIVE lifecycle, <code>inject</code> as the load-order mechanism, and why every registration must be reversible.</p>
   </a>
   <a class="card" data-lesson="4" href="lessons/0004-events.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 04 · cordis</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 04 · cordis</span>
     <h3>Events: the five dispatch modes</h3>
     <p><code>emit</code>, <code>parallel</code>, <code>serial</code>, <code>bail</code>, <code>waterfall</code> — and how waterfalls became the harness's middleware spine.</p>
   </a>
   <a class="card" data-lesson="5" href="lessons/0005-composition.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 05 · composition</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 05 · composition</span>
     <h3>cordis.yml, patches &amp; profiles</h3>
     <p>How a running app is assembled from YAML rows: Loader, Include, <code>!!js</code>, bundles, patch layers, and the <code>dsh-base</code> tour.</p>
   </a>
   <a class="card" data-lesson="6" href="lessons/0006-boot-trace.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 06 · composition</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 06 · composition</span>
     <h3>Boot trace: <code>dsh web</code></h3>
     <p>The complete journey from <code>process.argv</code> to a listening server, file by file — the "read this in order" tour.</p>
   </a>
   <a class="card" data-lesson="7" href="lessons/0007-session-log.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 07 · core</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 07 · core</span>
     <h3>The session log</h3>
     <p>The append-only <code>SessionEvent</code> log, the model-visible "surface", <code>deriveMessages()</code>, and the rule that everything model-visible must be logged.</p>
   </a>
   <a class="card" data-lesson="8" href="lessons/0008-agent-loop.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 08 · core</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 08 · core</span>
     <h3>The agent loop</h3>
     <p><code>ReactLoopAgent</code>: inbox, turns and steps, the <code>agent/pre-step</code> and <code>agent/request</code> waterfalls, streaming, and where tool calls fire.</p>
   </a>
   <a class="card" data-lesson="9" href="lessons/0009-tools-pipeline.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 09 · core</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 09 · core</span>
     <h3>The tool pipeline</h3>
     <p>How a tool is defined, registered, guarded, executed, and rendered — pre-execute → execute → post-execute, parallel pools, and presentation views.</p>
   </a>
   <a class="card" data-lesson="10" href="lessons/0010-llm-seam.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 10 · core</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 10 · core</span>
     <h3>The LLM seam</h3>
     <p>Provider adapters, <code>prepareCall</code>, the <code>llm/stream</code> waterfall, request headers, retries, and why the loop never talks to DeepSeek directly.</p>
   </a>
   <a class="card" data-lesson="11" href="lessons/0011-scopes-presets.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 11 · advanced</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 11 · advanced</span>
     <h3>Scopes, realms &amp; presets</h3>
     <p>Per-agent worlds: scope keys that route events, <code>isolate</code> realms that fork services, and the preset system that composes each session's agent.</p>
   </a>
   <a class="card" data-lesson="12" href="lessons/0012-seams-and-beyond.html">
-    <span class="done-mark">✓</span><span class="num">Lesson 12 · the wide map</span>
+    <span class="done-mark"><i class="ph ph-check"></i></span><span class="num">Lesson 12 · the wide map</span>
     <h3>Capability seams &amp; where things live</h3>
     <p>The Definition/Provider/Consumer pattern across the repo — subagents, jobs, MCP, sandbox, skills — and how you'd add a feature.</p>
   </a>

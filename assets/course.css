@@ -167,6 +167,13 @@ section { scroll-margin-top: 72px; }
 }
 .term { font-style: italic; }
 
+/* phosphor icons — optically aligned with text */
+.ph { font-size: 1em; line-height: 1; vertical-align: -0.1em; }
+.lesson-nav .ph, .crumb .ph { font-size: .95em; }
+button.mark-done { display: inline-flex; align-items: center; gap: 7px; }
+.card .done-mark .ph { font-size: 15px; }
+.dg-panel header button .ph { font-size: 15px; }
+
 /* ---------- top bar ---------- */
 .crumb {
   position: sticky;
@@ -221,7 +228,13 @@ a.code {
   white-space: nowrap;
 }
 a.code:hover { border-color: var(--accent-line); background: var(--accent-soft); }
-a.code::after { content: "↗"; margin-left: .32em; font-size: .85em; opacity: .6; }
+a.code::after {
+  content: "\e092"; /* ph-arrow-up-right */
+  font-family: "Phosphor";
+  margin-left: .34em;
+  font-size: .82em;
+  opacity: .65;
+}
 a.code .lines { color: var(--ink-3); }
 
 /* ---------- callouts ---------- */
@@ -269,14 +282,13 @@ details.deeper > summary {
 }
 details.deeper > summary::-webkit-details-marker { display: none; }
 details.deeper > summary::before {
-  content: "";
-  width: 6px; height: 6px;
-  border-right: 1.5px solid var(--ink-3);
-  border-bottom: 1.5px solid var(--ink-3);
-  transform: rotate(-45deg);
+  content: "\e13a"; /* ph-caret-right */
+  font-family: "Phosphor";
+  font-size: .78em;
+  color: var(--ink-3);
   flex: none;
 }
-details.deeper[open] > summary::before { transform: rotate(45deg); }
+details.deeper[open] > summary::before { content: "\e136"; /* ph-caret-down */ }
 details.deeper > summary:hover { color: var(--ink); }
 details.deeper > summary::after {
   content: "advanced";
@@ -321,12 +333,20 @@ details.deeper > .deeper-body {
   border-color: var(--ok-line);
   background: var(--ok-soft);
 }
-.quiz .opts button.correct::after { content: " ✓"; color: var(--ok); font-weight: 600; }
+.quiz .opts button.correct::after {
+  content: "  \e182"; /* ph-check */
+  font-family: "Phosphor";
+  color: var(--ok);
+}
 .quiz .opts button.wrong {
   border-color: var(--danger-line);
   background: var(--danger-soft);
 }
-.quiz .opts button.wrong::after { content: " ✗"; color: var(--danger); font-weight: 600; }
+.quiz .opts button.wrong::after {
+  content: "  \e4f6"; /* ph-x */
+  font-family: "Phosphor";
+  color: var(--danger);
+}
 .quiz .opts button:disabled { cursor: default; opacity: .55; }
 .quiz .opts button.correct:disabled, .quiz .opts button.wrong:disabled { opacity: 1; }
 .quiz .why {
